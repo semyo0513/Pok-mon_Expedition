@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🎮 포켓 필드 어드벤처 (Pocket Field Adventure)</title>
+  <?!= include('css'); ?>
+</head>
+<body>
+
+<div id="app-viewport">
+  <!-- GBC Header Bar -->
+  <header class="gb-header">
+    <div class="logo-title">
+      <span>🔴</span>
+      <span id="header-title">POCKET FIELD</span>
+    </div>
+    <div class="user-badge" id="header-user-badge">게스트</div>
+  </header>
+
+  <!-- Main View Router Container -->
+  <main class="gb-main" id="main-content">
+
+    <!-- ====================================================================
+         S1: 타이틀 화면 (Title Screen)
+         ==================================================================== -->
+    <section id="screen-s1" class="view-screen">
+      <div class="gb-box text-center mt-10" style="background: linear-gradient(180deg, #F5F3DE 0%, #E8A33D 100%);">
+        <h1 style="font-size: 24px; text-shadow: 2px 2px 0 #1F1F1F; color: #D84B3E; margin-bottom: 6px;">
+          🎮 POCKET FIELD
+        </h1>
+        <h2 style="font-size: 18px; color: #1F1F1F;">ADVENTURE</h2>
+        <div style="font-size: 13px; margin-top: 8px; color: #55555E;">2026 현장체험학습 탐험대</div>
+      </div>
+
+      <div class="gb-dialog mt-10">
+        <p id="s1-dialog-text">야생의 현장체험학습 미션이 나타났다! 원하는 역할의 버튼을 눌러 출발하자!</p>
+      </div>
+
+      <div class="flex-column mt-14">
+        <button class="gb-btn gb-btn-primary gb-btn-block" onclick="Router.navigate('s2')">
+          <span>🧢</span> 트레이너 팀장 입장
+        </button>
+        <button class="gb-btn gb-btn-block" onclick="Router.navigate('s3')">
+          <span>🎒</span> 팀원 파트너 입장
+        </button>
+        <button class="gb-btn gb-btn-block" style="background-color: var(--gb-dark); color: #FFF;" onclick="Router.navigate('s4')">
+          <span>👨‍🏫</span> 오박사(관리자) 모드
+        </button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         S2: 팀장 로그인 화면
+         ==================================================================== -->
+    <section id="screen-s2" class="view-screen hidden">
+      <div class="gb-box">
+        <h3>🧢 트레이너 팀장 로그인</h3>
+        <div class="text-small mt-10">1) 명단에서 본인 이름을 선택하세요.</div>
+        <select id="s2-member-select" class="gb-input mt-10">
+          <option value="">-- 명단 불러오는 중... --</option>
+        </select>
+
+        <div class="text-small mt-10">2) 팀장 코드를 입력하세요.</div>
+        <input type="text" id="s2-leader-code" class="gb-input mt-10" placeholder="팀장 코드 (예: GOLD-2026)">
+
+        <div id="s2-password-group" class="hidden">
+          <div class="text-small mt-10">3) 비밀번호를 입력하세요.</div>
+          <input type="password" id="s2-password" class="gb-input mt-10" placeholder="비밀번호">
+        </div>
+
+        <button class="gb-btn gb-btn-primary gb-btn-block mt-14" onclick="App.handleLeaderLogin()">
+          입장하기 ▶
+        </button>
+        <button class="gb-btn gb-btn-block mt-10" onclick="Router.navigate('s1')">
+          ◀ 뒤로가기
+        </button>
+      </div>
+    </section>
+
+    <!-- 최초 비밀번호 설정 모달 -->
+    <div id="modal-set-pw" class="gacha-modal hidden">
+      <div class="gb-box style="width: 100%; max-width: 360px;">
+        <h3>🔑 최초 비밀번호 설정</h3>
+        <p class="text-small mt-10">처음 로그인하는 팀장입니다. 사용할 비밀번호를 설정해 주세요.</p>
+        <input type="password" id="modal-pw-input" class="gb-input mt-10" placeholder="비밀번호 입력">
+        <input type="password" id="modal-pw-confirm" class="gb-input mt-10" placeholder="비밀번호 확인">
+        <button class="gb-btn gb-btn-primary gb-btn-block mt-14" onclick="App.handleSetInitialPassword()">
+          비밀번호 설정 및 로그인
+        </button>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         S3: 팀원 입장 화면
+         ==================================================================== -->
+    <section id="screen-s3" class="view-screen hidden">
+      <div class="gb-box">
+        <h3>🎒 팀원 파트너 입장</h3>
+        <p class="text-small mt-10">선생님(관리자)께 전달받은 팀원 코드를 입력하세요.</p>
+        <input type="text" id="s3-member-code" class="gb-input mt-14" placeholder="팀원 코드 (예: SILVER-2026)">
+        
+        <button class="gb-btn gb-btn-primary gb-btn-block mt-14" onclick="App.handleMemberLogin()">
+          게스트 세션 입장 ▶
+        </button>
+        <button class="gb-btn gb-btn-block mt-10" onclick="Router.navigate('s1')">
+          ◀ 뒤로가기
+        </button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         S4: 관리자 로그인 화면
+         ==================================================================== -->
+    <section id="screen-s4" class="view-screen hidden">
+      <div class="gb-box">
+        <h3>👨‍🏫 오박사(관리자) 로그인</h3>
+        <p class="text-small mt-10">운영자 전용 비밀 코드를 입력해 주세요.</p>
+        <input type="password" id="s4-admin-code" class="gb-input mt-14" placeholder="관리자 코드 (예: OAK-MASTER)">
+        
+        <button class="gb-btn gb-btn-primary gb-btn-block mt-14" onclick="App.handleAdminLogin()">
+          관리자 대시보드 접속 ▶
+        </button>
+        <button class="gb-btn gb-btn-block mt-10" onclick="Router.navigate('s1')">
+          ◀ 뒤로가기
+        </button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         S5 / S6: 팀 결성소 (Team Building)
+         ==================================================================== -->
+    <section id="screen-s6" class="view-screen hidden">
+      <div class="gb-box">
+        <h3>🚩 트레이너 팀 결성소</h3>
+        <p class="text-small mt-10">멋진 팀 이름을 정하고 팀원들을 선택하세요!</p>
+
+        <label class="text-small mt-10 display-block">1. 팀 이름</label>
+        <input type="text" id="s6-team-name" class="gb-input mt-10" placeholder="예: 피카츄 탐험대">
+
+        <label class="text-small mt-10 display-block">2. 팀 엠블럼 선택</label>
+        <div class="flex-row mt-10" style="flex-wrap: wrap;" id="s6-emblem-picker">
+          <button class="gb-btn" data-emblem="ball_normal" style="font-size: 20px;">🔴</button>
+          <button class="gb-btn" data-emblem="ball_great" style="font-size: 20px;">🔵</button>
+          <button class="gb-btn" data-emblem="ball_ultra" style="font-size: 20px;">🟡</button>
+          <button class="gb-btn" data-emblem="ball_master" style="font-size: 20px;">🟣</button>
+          <button class="gb-btn" data-emblem="thunder" style="font-size: 20px;">⚡</button>
+          <button class="gb-btn" data-emblem="fire" style="font-size: 20px;">🔥</button>
+          <button class="gb-btn" data-emblem="water" style="font-size: 20px;">💧</button>
+          <button class="gb-btn" data-emblem="leaf" style="font-size: 20px;">🍃</button>
+        </div>
+
+        <label class="text-small mt-14 display-block">3. 팀원 선택 (미배정 학생 목록)</label>
+        <div id="s6-member-checklist" class="gb-box mt-10" style="max-height: 180px; overflow-y: auto; background-color: #FFF;">
+          <div class="text-small">미배정 명단 로딩 중...</div>
+        </div>
+
+        <button class="gb-btn gb-btn-primary gb-btn-block mt-14" onclick="App.handleCreateTeam()">
+          ✨ 트레이너 팀 결성!
+        </button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         S7: 미션 게시판 (야생 풀숲 그리드)
+         ==================================================================== -->
+    <section id="screen-s7" class="view-screen hidden">
+      <div class="gb-dialog">
+        <p id="s7-grass-dialog">🌿 풀숲 속에 야생 포켓볼 미션들이 숨어있다! 포켓볼을 선택해 미션을 획득하자!</p>
+      </div>
+
+      <div class="grass-grid mt-10" id="s7-mission-grid">
+        <!-- JS로 포켓볼 미션 카드 로딩 -->
+      </div>
+    </section>
+
+    <!-- 미션 상세 & 획득 연출 모달 (뽑기 / 룰렛 / 선착순) -->
+    <div id="modal-mission-detail" class="gacha-modal hidden">
+      <div class="gb-box" style="width: 100%; max-width: 380px;">
+        <h3 id="md-title">미션 제목</h3>
+        <div class="text-small text-gold mt-10" id="md-points">🎁 성공 시 +20 EXP</div>
+        <p class="mt-10" id="md-desc" style="font-size: 14px; background: #FFF; padding: 8px; border: 2px solid #1F1F1F;">
+          미션 설명
+        </p>
+
+        <!-- 룰렛 영역 -->
+        <div id="md-roulette-box" class="hidden">
+          <div class="roulette-container">
+            <div class="roulette-pointer"></div>
+            <div class="roulette-wheel" id="roulette-wheel-el"></div>
+          </div>
+        </div>
+
+        <!-- 획득 실행 버튼 -->
+        <div class="mt-14 flex-column" id="md-action-btns">
+          <button class="gb-btn gb-btn-primary gb-btn-block" id="btn-acquire-action" onclick="App.executeAcquireMission()">
+            🔴 포켓볼 던지기 (획득)!
+          </button>
+          <button class="gb-btn gb-btn-block" onclick="App.closeMissionModal()">닫기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 포켓볼 뽑기 오픈 연출 모달 -->
+    <div id="gacha-anim-overlay" class="gacha-modal hidden">
+      <div class="gacha-ball" id="gacha-ball-el"></div>
+      <div class="gb-dialog mt-14" style="width: 90%; text-align: center;">
+        <p id="gacha-status-text">포켓볼이 흔들린다...</p>
+      </div>
+    </div>
+
+    <div class="flash-screen" id="flash-screen-el"></div>
+
+    <!-- ====================================================================
+         S9: 내 미션 가방
+         ==================================================================== -->
+    <section id="screen-s9" class="view-screen hidden">
+      <div class="gb-box">
+        <h3>🎒 우리 팀 획득 미션 가방</h3>
+        <div class="text-small mt-10" id="s9-team-title">소속 팀: -</div>
+      </div>
+
+      <div class="flex-column mt-10" id="s9-bag-list">
+        <!-- JS로 획득 미션 목록 삽입 -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         S10: 랭킹보드 (체육관 리더보드)
+         ==================================================================== -->
+    <section id="screen-s10" class="view-screen hidden">
+      <div class="gb-box text-center" style="background: linear-gradient(180deg, #E8A33D 0%, #F5F3DE 100%);">
+        <h2>🏆 체육관 리더보드</h2>
+        <div class="text-small" id="s10-updated-at">실시간 랭킹 갱신 중...</div>
+      </div>
+
+      <div class="flex-column mt-10" id="s10-ranking-list">
+        <!-- JS로 랭킹 카드 삽입 -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         S11: 관리자(오박사) 대시보드
+         ==================================================================== -->
+    <section id="screen-s11" class="view-screen hidden">
+      <div class="gb-box">
+        <h3>👨‍🏫 오박사 연구소 대시보드</h3>
+        <div class="flex-row mt-10" style="flex-wrap: wrap;">
+          <button class="gb-btn" onclick="App.showAdminTab('pending')">⚖ 판정 대기열</button>
+          <button class="gb-btn" onclick="App.showAdminTab('missions')">🎯 미션 관리</button>
+          <button class="gb-btn" onclick="App.showAdminTab('members')">👥 명단 관리</button>
+          <button class="gb-btn" onclick="App.showAdminTab('config')">⚙ 행사 설정</button>
+        </div>
+      </div>
+
+      <!-- Tab 1: 판정 대기열 -->
+      <div id="admin-tab-pending" class="admin-tab mt-10">
+        <h4>⚖ 성공/실패 판정 대기열</h4>
+        <div id="admin-pending-list" class="flex-column mt-10"></div>
+      </div>
+
+      <!-- Tab 2: 미션 관리 -->
+      <div id="admin-tab-missions" class="admin-tab mt-10 hidden">
+        <h4>🎯 미션 등록 / 수정</h4>
+        <div class="gb-box mt-10">
+          <input type="text" id="adm-m-title" class="gb-input mt-10" placeholder="미션 제목">
+          <textarea id="adm-m-desc" class="gb-input mt-10" placeholder="상세 설명"></textarea>
+          <input type="number" id="adm-m-points" class="gb-input mt-10" placeholder="포인트 (예: 20)">
+          <select id="adm-m-type" class="gb-input mt-10">
+            <option value="gacha">뽑기 (Gacha)</option>
+            <option value="roulette">룰렛 (Roulette)</option>
+            <option value="first_come">선착순 (First Come)</option>
+          </select>
+          <label class="text-small mt-10 display-block">슬롯 내역 (줄바꿈 구분)</label>
+          <textarea id="adm-m-slots" class="gb-input mt-10" rows="3" placeholder="슬롯 1&#10;슬롯 2&#10;슬롯 3"></textarea>
+          <button class="gb-btn gb-btn-primary gb-btn-block mt-10" onclick="App.handleAdminSaveMission()">미션 저장</button>
+        </div>
+      </div>
+
+      <!-- Tab 3: 명단 관리 -->
+      <div id="admin-tab-members" class="admin-tab mt-10 hidden">
+        <h4>👥 학생 명단 등록 & 랜덤 배정</h4>
+        <div class="gb-box mt-10">
+          <label class="text-small">학생 이름 붙여넣기 (줄바꿈 구분)</label>
+          <textarea id="adm-mem-text" class="gb-input mt-10" rows="4" placeholder="김철수&#10;이영희&#10;박민수"></textarea>
+          <button class="gb-btn gb-btn-primary gb-btn-block mt-10" onclick="App.handleAdminAddMembers()">명단 추가</button>
+          <button class="gb-btn gb-btn-block mt-10" onclick="App.handleAdminRandomAssign()">🎲 미배정자 자동 분산 배치</button>
+        </div>
+      </div>
+
+      <!-- Tab 4: 행사 설정 -->
+      <div id="admin-tab-config" class="admin-tab mt-10 hidden">
+        <h4>⚙ 행사 Phase 제어 & 보안</h4>
+        <div class="gb-box mt-10 flex-column">
+          <button class="gb-btn gb-btn-primary" onclick="App.handleAdminSetPhase('building')">단계 1: 팀 빌딩 (building)</button>
+          <button class="gb-btn gb-btn-success" onclick="App.handleAdminSetPhase('mission')">단계 2: 미션 진행 (mission)</button>
+          <button class="gb-btn gb-btn-danger" onclick="App.handleAdminSetPhase('closed')">단계 3: 행사 종료 (closed)</button>
+          <hr>
+          <button class="gb-btn gb-btn-danger gb-btn-block" onclick="App.handleAdminPurgeData()">⚠ 행사 종료 후 개인정보 파기</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- GBC Bottom Navigation Bar -->
+  <nav class="gb-navbar" id="app-navbar">
+    <button class="nav-item active" onclick="Router.navigate('s7')">
+      <span class="nav-icon">🌿</span>
+      <span>미션풀숲</span>
+    </button>
+    <button class="nav-item" onclick="Router.navigate('s9')">
+      <span class="nav-icon">🎒</span>
+      <span>가방</span>
+    </button>
+    <button class="nav-item" onclick="Router.navigate('s10')">
+      <span class="nav-icon">🏆</span>
+      <span>랭킹</span>
+    </button>
+    <button class="nav-item" onclick="Router.navigate('s6')">
+      <span class="nav-icon">🚩</span>
+      <span>팀결성</span>
+    </button>
+  </nav>
+</div>
+
+<?!= include('js'); ?>
+</body>
+</html>

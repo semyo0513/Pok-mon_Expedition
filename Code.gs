@@ -1,0 +1,695 @@
+/**
+ * 🎮 포켓 필드 어드벤처 (Pocket Field Adventure) - GAS 백엔드 API (Code.gs)
+ * 구글 앱스 스크립트에는 이 Code.gs 파일만 넣어서 배포합니다.
+ * 깃허브 저장소: https://github.com/semyo0513/Pok-mon_Expedition
+ */
+
+// GitHub Repository Raw 기본 경로 (main 브랜치 소스 동적 서빙)
+var GITHUB_RAW_BASE = "https://raw.githubusercontent.com/semyo0513/Pok-mon_Expedition/main"; 
+
+function doGet(e) {
+  e = e || { parameter: {} };
+  
+  // REST GET API 요청 처리
+  if (e.parameter && e.parameter.action) {
+    var result = routeAction(e.parameter.action, e.parameter.token, e.parameter);
+    return createJsonResponse(result);
+  }
+
+  // GAS 웹앱 직접 접속 시 HTML 서빙
+  try {
+    var template = HtmlService.createTemplateFromFile('index');
+    return template.evaluate()
+      .setTitle('포켓 필드 어드벤처 - Pocket Field Adventure')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  } catch (err) {
+    // 깃허브에서 index.html, css.html, js.html 동적 서빙
+    if (GITHUB_RAW_BASE) {
+      try {
+        var htmlContent = UrlFetchApp.fetch(GITHUB_RAW_BASE + '/index.html').getContentText();
+        var cssContent = UrlFetchApp.fetch(GITHUB_RAW_BASE + '/css.html').getContentText();
+        var jsContent = UrlFetchApp.fetch(GITHUB_RAW_BASE + '/js.html').getContentText();
+        
+        var combined = htmlContent
+          .replace("<?!= include('css'); ?>", cssContent)
+          .replace("<?!= include('js'); ?>", jsContent);
+          
+        return HtmlService.createHtmlOutput(combined)
+          .setTitle('포켓 필드 어드벤처 - Pocket Field Adventure')
+          .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
+          .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+      } catch (fetchErr) {
+        return HtmlService.createHtmlOutput('<h3>깃허브 연동 오류: 소스 파일을 가져올 수 없습니다.</h3><p>' + fetchErr.toString() + '</p>');
+      }
+    }
+    
+    return HtmlService.createHtmlOutput('<h3>포켓 필드 어드벤처 API 서버 동작 중 🔴</h3><p>Code.gs API 백엔드가 준비되었습니다.</p>');
+  }
+}
+
+function doPost(e) {
+  try {
+    var data = {};
+    if (e && e.postData && e.postData.contents) {
+      data = JSON.parse(e.postData.contents);
+    }
+    var action = data.action || '';
+    var token = data.token || '';
+    var payload = data.payload || data;
+
+    var result = routeAction(action, token, payload);
+    return createJsonResponse(result);
+  } catch (err) {
+    return createJsonResponse({ ok: false, error: { message: err.toString() } });
+  }
+}
+
+function createJsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function include(filename) {
+  try {
+    return HtmlService.createHtmlOutputFromFile(filename).getContent();
+  } catch (e) {
+    return '';
+  }
+}
+
+function routeAction(action, token, payload) {
+  switch (action) {
+    case 'login': return login(payload);
+    case 'setInitialPassword': return setInitialPassword(payload);
+    case 'getMemberList': return getMemberList(token);
+    case 'createTeam': return createTeam(token, payload);
+    case 'getMissions': return getMissions(token);
+    case 'acquireMission': return acquireMission(token, payload);
+    case 'getMyBag': return getMyBag(token);
+    case 'getRanking': return getRanking(token);
+    case 'adminGetDashboard': return adminGetDashboard(token);
+    case 'adminJudge': return adminJudge(token, payload);
+    case 'adminUpsertMission': return adminUpsertMission(token, payload);
+    case 'adminUpsertMembers': return adminUpsertMembers(token, payload);
+    case 'adminRandomAssign': return adminRandomAssign(token, payload);
+    case 'adminAdjustPoints': return adminAdjustPoints(token, payload);
+    case 'adminUpdateConfig': return adminUpdateConfig(token, payload);
+    case 'adminPurgeData': return adminPurgeData(token);
+    default:
+      return { ok: false, error: { message: '알 수 없는 요청 액션입니다: ' + action } };
+  }
+}
+
+// ==========================================
+// DB 및 비즈니스 로직 함수 모듈
+// ==========================================
+
+function getDb() { return SpreadsheetApp.getActiveSpreadsheet(); }
+function getSheet(sheetName) {
+  var ss = getDb();
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) throw new Error('시트를 찾을 수 없습니다: ' + sheetName);
+  return sheet;
+}
+
+function getSheetObjects(sheetName) {
+  var sheet = getSheet(sheetName);
+  var data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return [];
+  var headers = data[0];
+  var result = [];
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var obj = {};
+    for (var j = 0; j < headers.length; j++) obj[headers[j]] = row[j];
+    obj._rowIndex = i + 1;
+    result.push(obj);
+  }
+  return result;
+}
+
+function getConfigMap() {
+  var sheet = getSheet('Config');
+  var data = sheet.getDataRange().getValues();
+  var config = {};
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0]) config[data[i][0]] = data[i][1];
+  }
+  return config;
+}
+
+function hashPassword(password) {
+  var salt = 'POCKET_FIELD_SALT_2026';
+  var rawBytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, salt + password);
+  var txtHash = '';
+  for (var i = 0; i < rawBytes.length; i++) {
+    var byteVal = rawBytes[i];
+    if (byteVal < 0) byteVal += 256;
+    var byteStr = byteVal.toString(16);
+    if (byteStr.length == 1) byteStr = '0' + byteStr;
+    txtHash += byteStr;
+  }
+  return txtHash;
+}
+
+function createSession(memberId, role) {
+  var token = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+  var sheet = getSheet('Sessions');
+  var now = new Date();
+  var expires = new Date(now.getTime() + 12 * 60 * 60 * 1000);
+  sheet.appendRow([token, memberId, role, expires.toISOString()]);
+  return token;
+}
+
+function verifyToken(token) {
+  if (!token) return { valid: false, message: '토큰이 제공되지 않았습니다.' };
+  if (token.indexOf('MEMBER_GUEST_') === 0) {
+    return { valid: true, memberId: 'GUEST', role: 'member', teamId: '' };
+  }
+
+  var sessions = getSheetObjects('Sessions');
+  var now = new Date();
+  var session = null;
+  for (var i = sessions.length - 1; i >= 0; i--) {
+    if (sessions[i].token === token) { session = sessions[i]; break; }
+  }
+  if (!session) return { valid: false, message: '유효하지 않은 세션입니다.' };
+  var expDate = new Date(session.expires_at);
+  if (now > expDate) return { valid: false, message: '세션이 만료되었습니다.' };
+  
+  var member = null;
+  var teamId = '';
+  if (session.member_id !== 'ADMIN') {
+    var members = getSheetObjects('Members');
+    for (var j = 0; j < members.length; j++) {
+      if (members[j].member_id === session.member_id) {
+        member = members[j];
+        teamId = member.team_id || '';
+        break;
+      }
+    }
+  }
+
+  return { valid: true, memberId: session.member_id, role: session.role, teamId: teamId, member: member };
+}
+
+function login(payload) {
+  try {
+    var role = payload.role;
+    var config = getConfigMap();
+
+    if (role === 'admin') {
+      if (payload.adminCode !== config.admin_code) return { ok: false, error: { message: '관리자 코드가 일치하지 않습니다.' } };
+      var token = createSession('ADMIN', 'admin');
+      return { ok: true, data: { token: token, role: 'admin', memberName: '오박사(운영자)' } };
+    }
+
+    if (role === 'member') {
+      if (payload.memberCode !== config.member_code) return { ok: false, error: { message: '팀원 입장 코드가 일치하지 않습니다.' } };
+      var guestToken = 'MEMBER_GUEST_' + Utilities.getUuid();
+      return { ok: true, data: { token: guestToken, role: 'member', memberName: '파트너 트레이너' } };
+    }
+
+    if (role === 'leader') {
+      if (payload.leaderCode !== config.leader_code) return { ok: false, error: { message: '팀장 입장 코드가 일치하지 않습니다.' } };
+      var members = getSheetObjects('Members');
+      var targetMember = null;
+      for (var i = 0; i < members.length; i++) {
+        if (members[i].member_id === payload.memberId || members[i].name === payload.memberName) {
+          targetMember = members[i]; break;
+        }
+      }
+      if (!targetMember) return { ok: false, error: { message: '명단에서 찾을 수 없는 사용자입니다.' } };
+
+      if (targetMember.pw_set === false || targetMember.pw_set === 'FALSE' || !targetMember.pw_hash) {
+        return { ok: true, requireSetPassword: true, memberId: targetMember.member_id, memberName: targetMember.name };
+      }
+
+      var inputHash = hashPassword(payload.password);
+      if (inputHash !== targetMember.pw_hash) return { ok: false, error: { message: '비밀번호가 일치하지 않습니다.' } };
+
+      var leaderToken = createSession(targetMember.member_id, 'leader');
+      return {
+        ok: true,
+        data: { token: leaderToken, role: 'leader', memberId: targetMember.member_id, memberName: targetMember.name, teamId: targetMember.team_id || '' }
+      };
+    }
+    return { ok: false, error: { message: '잘못된 로그인 요청입니다.' } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
+
+function setInitialPassword(payload) {
+  try {
+    var config = getConfigMap();
+    if (payload.leaderCode !== config.leader_code) return { ok: false, error: { message: '팀장 입장 코드가 올바르지 않습니다.' } };
+    var sheet = getSheet('Members');
+    var members = getSheetObjects('Members');
+    var target = null;
+    for (var i = 0; i < members.length; i++) {
+      if (members[i].member_id === payload.memberId) { target = members[i]; break; }
+    }
+    if (!target) return { ok: false, error: { message: '사용자를 찾을 수 없습니다.' } };
+    var hashed = hashPassword(payload.password);
+    sheet.getRange(target._rowIndex, 6).setValue(hashed);
+    sheet.getRange(target._rowIndex, 7).setValue(true);
+    var token = createSession(target.member_id, 'leader');
+    return { ok: true, data: { token: token, role: 'leader', memberId: target.member_id, memberName: target.name, teamId: target.team_id || '' } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
+
+function getMemberList(token) {
+  try {
+    var auth = verifyToken(token);
+    if (!auth.valid) return { ok: false, error: { message: auth.message } };
+    var members = getSheetObjects('Members');
+    var unassigned = [], allMembers = [];
+    for (var i = 0; i < members.length; i++) {
+      var m = members[i];
+      if (m.role !== 'admin') {
+        var item = { member_id: m.member_id, name: m.name, class_info: m.class_info, team_id: m.team_id || '' };
+        allMembers.push(item);
+        if (!m.team_id) unassigned.push(item);
+      }
+    }
+    return { ok: true, data: { unassigned: unassigned, all: allMembers } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
+
+function createTeam(token, payload) {
+  var lock = LockService.getScriptLock();
+  try {
+    if (!lock.waitLock(10000)) return { ok: false, error: { message: '동시 팀 생성 요청 대기 초과' } };
+    var auth = verifyToken(token);
+    if (!auth.valid || (auth.role !== 'leader' && auth.role !== 'admin')) return { ok: false, error: { message: '권한 없음' } };
+    var config = getConfigMap();
+    var minSize = parseInt(config.team_size_min || '2', 10);
+    var maxSize = parseInt(config.team_size_max || '6', 10);
+    var teamName = (payload.teamName || '').trim();
+    var emblem = payload.emblem || 'ball_normal';
+    var selectedMemberIds = payload.memberIds || [];
+    if (!teamName) return { ok: false, error: { message: '팀 이름 입력 필요' } };
+    if (selectedMemberIds.indexOf(auth.memberId) === -1) selectedMemberIds.push(auth.memberId);
+
+    var membersSheet = getSheet('Members');
+    var members = getSheetObjects('Members');
+    var teams = getSheetObjects('Teams');
+
+    for (var i = 0; i < teams.length; i++) {
+      if (teams[i].team_name === teamName) return { ok: false, error: { message: '이미 존재' } };
+    }
+    for (var j = 0; j < members.length; j++) {
+      if (selectedMemberIds.indexOf(members[j].member_id) !== -1 && members[j].team_id) {
+        return { ok: false, error: { message: members[j].name + ' 학생은 이미 소속팀이 있습니다.' } };
+      }
+    }
+    var newTeamId = 'T' + ('0' + (teams.length + 1)).slice(-2);
+    var teamsSheet = getSheet('Teams');
+    var now = new Date().toISOString();
+    teamsSheet.appendRow([newTeamId, teamName, auth.memberId, emblem, 0, now, 'active']);
+
+    for (var k = 0; k < members.length; k++) {
+      if (selectedMemberIds.indexOf(members[k].member_id) !== -1) {
+        var mRole = (members[k].member_id === auth.memberId) ? 'leader' : 'member';
+        membersSheet.getRange(members[k]._rowIndex, 4).setValue(mRole);
+        membersSheet.getRange(members[k]._rowIndex, 5).setValue(newTeamId);
+      }
+    }
+    return { ok: true, data: { teamId: newTeamId, teamName: teamName, emblem: emblem, message: '팀 [' + teamName + '] 결성 완료!' } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+  finally { lock.releaseLock(); }
+}
+
+function getMissions(token) {
+  try {
+    var auth = verifyToken(token);
+    if (!auth.valid) return { ok: false, error: { message: auth.message } };
+    var missions = getSheetObjects('Missions');
+    var logs = getSheetObjects('MissionLog');
+    var config = getConfigMap();
+    var myTeamAcquiredMap = {};
+    for (var i = 0; i < logs.length; i++) {
+      if (logs[i].team_id === auth.teamId) myTeamAcquiredMap[logs[i].mission_id] = logs[i];
+    }
+    var resultList = [];
+    for (var j = 0; j < missions.length; j++) {
+      var m = missions[j];
+      if (m.status === 'draft' && auth.role !== 'admin') continue;
+      var slots = [];
+      try { slots = JSON.parse(m.slots_json || '[]'); } catch (e) {}
+      var usedSlotIndices = [];
+      for (var k = 0; k < logs.length; k++) {
+        if (logs[k].mission_id === m.mission_id) usedSlotIndices.push(parseInt(logs[k].slot_index, 10));
+      }
+      var acquiredLog = myTeamAcquiredMap[m.mission_id] || null;
+      resultList.push({
+        mission_id: m.mission_id, title: m.title, description: m.description,
+        points: parseInt(m.points || '0', 10), slot_count: parseInt(m.slot_count || '0', 10),
+        slots: slots, used_slots: usedSlotIndices, acquire_type: m.acquire_type,
+        ball_type: m.ball_type || 'normal', open_at: m.open_at, close_at: m.close_at,
+        status: m.status, my_acquired: acquiredLog
+      });
+    }
+    return { ok: true, data: { missions: resultList, teamId: auth.teamId, eventPhase: config.event_phase || 'building' } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
+
+function acquireMission(token, payload) {
+  var lock = LockService.getScriptLock();
+  try {
+    if (!lock.waitLock(10000)) return { ok: false, error: { message: '요청 대기 초과' } };
+    var auth = verifyToken(token);
+    if (!auth.valid || auth.role !== 'leader') return { ok: false, error: { message: '팀장만 가능' } };
+    if (!auth.teamId) return { ok: false, error: { message: '팀 결성 필요' } };
+
+    var missionId = payload.missionId;
+    var missions = getSheetObjects('Missions');
+    var targetMission = null;
+    for (var i = 0; i < missions.length; i++) {
+      if (missions[i].mission_id === missionId) { targetMission = missions[i]; break; }
+    }
+    if (!targetMission || targetMission.status !== 'open') return { ok: false, error: { message: '진행중 아님' } };
+
+    var logsSheet = getSheet('MissionLog');
+    var logs = getSheetObjects('MissionLog');
+    for (var j = 0; j < logs.length; j++) {
+      if (logs[j].mission_id === missionId && logs[j].team_id === auth.teamId) {
+        return { ok: false, error: { message: '이미 획득함' } };
+      }
+    }
+
+    var slots = [];
+    try { slots = JSON.parse(targetMission.slots_json || '[]'); } catch (e) {}
+    var usedIndices = [];
+    for (var k = 0; k < logs.length; k++) {
+      if (logs[k].mission_id === missionId) usedIndices.push(parseInt(logs[k].slot_index, 10));
+    }
+    var availableIndices = [];
+    for (var s = 0; s < slots.length; s++) {
+      if (usedIndices.indexOf(s) === -1) availableIndices.push(s);
+    }
+    if (availableIndices.length === 0) return { ok: false, error: { message: '마감되었습니다.' } };
+
+    var selectedIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+    var slotContent = slots[selectedIndex] || '특별 야생 미션';
+    var logId = 'LOG_' + Utilities.getUuid().substring(0, 8);
+    var nowIso = new Date().toISOString();
+
+    logsSheet.appendRow([logId, missionId, auth.teamId, selectedIndex, slotContent, nowIso, 'pending', '', '']);
+    return { ok: true, data: { logId: logId, missionId: missionId, slotIndex: selectedIndex, slotContent: slotContent, ballType: targetMission.ball_type || 'normal', points: parseInt(targetMission.points || '0', 10), acquiredAt: nowIso } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+  finally { lock.releaseLock(); }
+}
+
+function getMyBag(token) {
+  try {
+    var auth = verifyToken(token);
+    if (!auth.valid) return { ok: false, error: { message: auth.message } };
+    if (!auth.teamId) return { ok: true, data: { items: [], teamName: '미배정' } };
+    var logs = getSheetObjects('MissionLog');
+    var missions = getSheetObjects('Missions');
+    var teams = getSheetObjects('Teams');
+
+    var teamName = auth.teamId;
+    for (var t = 0; t < teams.length; t++) {
+      if (teams[t].team_id === auth.teamId) { teamName = teams[t].team_name; break; }
+    }
+
+    var missionMap = {};
+    for (var m = 0; m < missions.length; m++) missionMap[missions[m].mission_id] = missions[m];
+    var myItems = [];
+    for (var i = 0; i < logs.length; i++) {
+      if (logs[i].team_id === auth.teamId) {
+        var mis = missionMap[logs[i].mission_id] || {};
+        myItems.push({
+          log_id: logs[i].log_id, mission_id: logs[i].mission_id, title: mis.title || '미션',
+          points: parseInt(mis.points || '0', 10), slot_index: logs[i].slot_index,
+          slot_content: logs[i].slot_content, acquired_at: logs[i].acquired_at,
+          result: logs[i].result, judged_at: logs[i].judged_at
+        });
+      }
+    }
+    return { ok: true, data: { items: myItems, teamId: auth.teamId, teamName: teamName } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
+
+function getRanking(token) {
+  try {
+    var cache = CacheService.getScriptCache();
+    var cachedData = cache.get('RANKING_DATA');
+    var config = getConfigMap();
+
+    if (config.ranking_visible === 'FALSE' || config.ranking_visible === false) {
+      var authCheck = token ? verifyToken(token) : { role: 'guest' };
+      if (authCheck.role !== 'admin') {
+        return { ok: true, data: { hidden: true, message: '현재 랭킹보드가 비공개 모드입니다. 🏆' } };
+      }
+    }
+
+    if (cachedData) return { ok: true, data: JSON.parse(cachedData) };
+
+    var teams = getSheetObjects('Teams');
+    var logs = getSheetObjects('MissionLog');
+    var members = getSheetObjects('Members');
+
+    var teamMembersMap = {};
+    for (var m = 0; m < members.length; m++) {
+      if (members[m].team_id) {
+        if (!teamMembersMap[members[m].team_id]) teamMembersMap[members[m].team_id] = [];
+        teamMembersMap[members[m].team_id].push(members[m].name);
+      }
+    }
+
+    var teamClearedMap = {};
+    for (var l = 0; l < logs.length; l++) {
+      if (logs[l].result === 'success') teamClearedMap[logs[l].team_id] = (teamClearedMap[logs[l].team_id] || 0) + 1;
+    }
+
+    var rankingList = [];
+    for (var i = 0; i < teams.length; i++) {
+      var t = teams[i];
+      if (t.status === 'disbanded') continue;
+      rankingList.push({
+        team_id: t.team_id, team_name: t.team_name, emblem: t.emblem || 'ball_normal',
+        total_points: parseInt(t.total_points || '0', 10), cleared_count: teamClearedMap[t.team_id] || 0,
+        members: teamMembersMap[t.team_id] || []
+      });
+    }
+
+    rankingList.sort(function(a, b) {
+      if (b.total_points !== a.total_points) return b.total_points - a.total_points;
+      return b.cleared_count - a.cleared_count;
+    });
+
+    for (var r = 0; r < rankingList.length; r++) rankingList[r].rank = r + 1;
+
+    var payload = { ranking: rankingList, updatedAt: new Date().toISOString() };
+    cache.put('RANKING_DATA', JSON.stringify(payload), 15);
+    return { ok: true, data: payload };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
+
+function adminGetDashboard(token) {
+  try {
+    var auth = verifyToken(token);
+    if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한 필요' } };
+
+    var members = getSheetObjects('Members');
+    var teams = getSheetObjects('Teams');
+    var missions = getSheetObjects('Missions');
+    var logs = getSheetObjects('MissionLog');
+    var config = getConfigMap();
+
+    var pendingLogs = [];
+    var teamMap = {};
+    for (var t = 0; t < teams.length; t++) teamMap[teams[t].team_id] = teams[t];
+    var misMap = {};
+    for (var m = 0; m < missions.length; m++) misMap[missions[m].mission_id] = missions[m];
+
+    for (var l = 0; l < logs.length; l++) {
+      if (logs[l].result === 'pending') {
+        var tm = teamMap[logs[l].team_id] || {};
+        var ms = misMap[logs[l].mission_id] || {};
+        pendingLogs.push({
+          log_id: logs[l].log_id, team_id: logs[l].team_id, team_name: tm.team_name || logs[l].team_id,
+          mission_title: ms.title || logs[l].mission_id, slot_content: logs[l].slot_content,
+          points: parseInt(ms.points || '0', 10), acquired_at: logs[l].acquired_at
+        });
+      }
+    }
+    return { ok: true, data: { members: members, teams: teams, missions: missions, pendingLogs: pendingLogs, config: config } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
+
+function adminJudge(token, payload) {
+  var lock = LockService.getScriptLock();
+  try {
+    if (!lock.waitLock(10000)) return { ok: false, error: { message: '잠시 후 다시 시도' } };
+    var auth = verifyToken(token);
+    if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한 필요' } };
+
+    var logId = payload.logId;
+    var result = payload.result;
+    var logsSheet = getSheet('MissionLog');
+    var logs = getSheetObjects('MissionLog');
+    var targetLog = null;
+    for (var i = 0; i < logs.length; i++) {
+      if (logs[i].log_id === logId) { targetLog = logs[i]; break; }
+    }
+    if (!targetLog) return { ok: false, error: { message: '기록을 찾을 수 없음' } };
+
+    var nowIso = new Date().toISOString();
+    logsSheet.getRange(targetLog._rowIndex, 7).setValue(result);
+    logsSheet.getRange(targetLog._rowIndex, 8).setValue(auth.memberId);
+    logsSheet.getRange(targetLog._rowIndex, 9).setValue(nowIso);
+
+    if (result === 'success') {
+      var missions = getSheetObjects('Missions');
+      var pointsToGive = 10;
+      for (var m = 0; m < missions.length; m++) {
+        if (missions[m].mission_id === targetLog.mission_id) {
+          pointsToGive = parseInt(missions[m].points || '10', 10); break;
+        }
+      }
+      var pointsSheet = getSheet('Points');
+      pointsSheet.appendRow(['P_' + Utilities.getUuid().substring(0, 8), targetLog.team_id, pointsToGive, '미션 성공: ' + targetLog.slot_content, logId, auth.memberId, nowIso]);
+      recalculateTeamPoints(targetLog.team_id);
+    }
+
+    CacheService.getScriptCache().remove('RANKING_DATA');
+    return { ok: true, data: { message: '판정 저장 완료' } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+  finally { lock.releaseLock(); }
+}
+
+function recalculateTeamPoints(teamId) {
+  var points = getSheetObjects('Points');
+  var total = 0;
+  for (var i = 0; i < points.length; i++) {
+    if (points[i].team_id === teamId) total += parseInt(points[i].delta || '0', 10);
+  }
+  var teamsSheet = getSheet('Teams');
+  var teams = getSheetObjects('Teams');
+  for (var t = 0; t < teams.length; t++) {
+    if (teams[t].team_id === teamId) {
+      teamsSheet.getRange(teams[t]._rowIndex, 5).setValue(total); break;
+    }
+  }
+}
+
+function adminUpsertMission(token, payload) {
+  try {
+    var auth = verifyToken(token);
+    if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한 필요' } };
+    var missionsSheet = getSheet('Missions');
+    var missions = getSheetObjects('Missions');
+    var missionId = payload.mission_id;
+    var slotsJson = JSON.stringify(payload.slots || []);
+    var slotCount = (payload.slots || []).length;
+
+    if (missionId) {
+      for (var i = 0; i < missions.length; i++) {
+        if (missions[i].mission_id === missionId) {
+          var r = missions[i]._rowIndex;
+          missionsSheet.getRange(r, 2).setValue(payload.title);
+          missionsSheet.getRange(r, 3).setValue(payload.description);
+          missionsSheet.getRange(r, 4).setValue(payload.points);
+          missionsSheet.getRange(r, 5).setValue(slotCount);
+          missionsSheet.getRange(r, 6).setValue(slotsJson);
+          missionsSheet.getRange(r, 7).setValue(payload.acquire_type);
+          missionsSheet.getRange(r, 8).setValue(payload.ball_type || 'normal');
+          missionsSheet.getRange(r, 11).setValue(payload.status || 'draft');
+          return { ok: true, data: { message: '미션 수정 완료' } };
+        }
+      }
+    }
+    var newId = 'Q' + ('00' + (missions.length + 1)).slice(-3);
+    missionsSheet.appendRow([newId, payload.title, payload.description, payload.points, slotCount, slotsJson, payload.acquire_type || 'gacha', payload.ball_type || 'normal', '', '', payload.status || 'open']);
+    return { ok: true, data: { message: '새 미션 [' + newId + '] 등록 완료' } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
+
+function adminUpsertMembers(token, memberList) {
+  try {
+    var auth = verifyToken(token);
+    if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한 필요' } };
+    var membersSheet = getSheet('Members');
+    var existing = getSheetObjects('Members');
+    for (var i = 0; i < memberList.length; i++) {
+      var item = memberList[i];
+      if (!item.name) continue;
+      var newId = 'M' + ('00' + (existing.length + i + 1)).slice(-3);
+      membersSheet.appendRow([newId, item.name, item.class_info || '', 'member', '', '', false, new Date().toISOString()]);
+    }
+    return { ok: true, data: { message: memberList.length + '명 추가 완료' } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
+
+function adminRandomAssign(token, payload) {
+  try {
+    var auth = verifyToken(token);
+    if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한 필요' } };
+    var membersSheet = getSheet('Members');
+    var members = getSheetObjects('Members');
+    var teams = getSheetObjects('Teams');
+    var unassigned = [];
+    for (var i = 0; i < members.length; i++) {
+      if (!members[i].team_id && members[i].role !== 'admin') unassigned.push(members[i]);
+    }
+    if (unassigned.length === 0) return { ok: false, error: { message: '미배정 학생 없음' } };
+    if (teams.length > 0) {
+      for (var u = 0; u < unassigned.length; u++) {
+        var targetTeam = teams[u % teams.length];
+        membersSheet.getRange(unassigned[u]._rowIndex, 5).setValue(targetTeam.team_id);
+      }
+      return { ok: true, data: { message: unassigned.length + '명 자동 배치 완료' } };
+    }
+    return { ok: false, error: { message: '배정할 팀 없음' } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
+
+function adminAdjustPoints(token, payload) {
+  try {
+    var auth = verifyToken(token);
+    if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한 필요' } };
+    var pointsSheet = getSheet('Points');
+    pointsSheet.appendRow(['P_' + Utilities.getUuid().substring(0, 8), payload.teamId, parseInt(payload.delta || '0', 10), payload.reason || '수동 조정', '', auth.memberId, new Date().toISOString()]);
+    recalculateTeamPoints(payload.teamId);
+    CacheService.getScriptCache().remove('RANKING_DATA');
+    return { ok: true, data: { message: '포인트 조정 완료' } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
+
+function adminUpdateConfig(token, payload) {
+  try {
+    var auth = verifyToken(token);
+    if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한 필요' } };
+    var configSheet = getSheet('Config');
+    var data = configSheet.getDataRange().getValues();
+    for (var key in payload) {
+      var found = false;
+      for (var i = 1; i < data.length; i++) {
+        if (data[i][0] === key) { configSheet.getRange(i + 1, 2).setValue(payload[key]); found = true; break; }
+      }
+      if (!found) configSheet.appendRow([key, payload[key], '']);
+    }
+    return { ok: true, data: { message: '설정 저장 완료' } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
+
+function adminPurgeData(token) {
+  try {
+    var auth = verifyToken(token);
+    if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한 필요' } };
+    var membersSheet = getSheet('Members');
+    var members = getSheetObjects('Members');
+    for (var i = 0; i < members.length; i++) {
+      if (members[i].role !== 'admin') {
+        membersSheet.getRange(members[i]._rowIndex, 2).setValue('학생_' + members[i].member_id);
+        membersSheet.getRange(members[i]._rowIndex, 3).setValue('');
+        membersSheet.getRange(members[i]._rowIndex, 6).setValue('');
+      }
+    }
+    return { ok: true, data: { message: '개인정보 파기 완료' } };
+  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
