@@ -4,47 +4,36 @@
  * 깃허브 저장소: https://github.com/semyo0513/Pok-mon_Expedition
  */
 
-// GitHub Repository Raw 기본 경로 (main 브랜치 소스 동적 서빙)
 var GITHUB_RAW_BASE = "https://raw.githubusercontent.com/semyo0513/Pok-mon_Expedition/main"; 
 
 function doGet(e) {
   e = e || { parameter: {} };
   
-  // REST GET API 요청 처리
   if (e.parameter && e.parameter.action) {
     var result = routeAction(e.parameter.action, e.parameter.token, e.parameter);
     return createJsonResponse(result);
   }
 
-  // GAS 웹앱 직접 접속 시 HTML 서빙
+  // GAS 웹앱 렌더링
   try {
     var template = HtmlService.createTemplateFromFile('index');
     return template.evaluate()
-      .setTitle('포켓 필드 어드벤처 - Pocket Field Adventure')
+      .setTitle('포켓 필드 어드벤처 - POCKET FIELD ADVENTURE')
       .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   } catch (err) {
-    // 깃허브에서 index.html, css.html, js.html 동적 서빙
     if (GITHUB_RAW_BASE) {
       try {
         var htmlContent = UrlFetchApp.fetch(GITHUB_RAW_BASE + '/index.html').getContentText();
-        var cssContent = UrlFetchApp.fetch(GITHUB_RAW_BASE + '/css.html').getContentText();
-        var jsContent = UrlFetchApp.fetch(GITHUB_RAW_BASE + '/js.html').getContentText();
-        
-        var combined = htmlContent
-          .replace("<?!= include('css'); ?>", cssContent)
-          .replace("<?!= include('js'); ?>", jsContent);
-          
-        return HtmlService.createHtmlOutput(combined)
-          .setTitle('포켓 필드 어드벤처 - Pocket Field Adventure')
+        return HtmlService.createHtmlOutput(htmlContent)
+          .setTitle('포켓 필드 어드벤처 - POCKET FIELD ADVENTURE')
           .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
           .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
       } catch (fetchErr) {
-        return HtmlService.createHtmlOutput('<h3>깃허브 연동 오류: 소스 파일을 가져올 수 없습니다.</h3><p>' + fetchErr.toString() + '</p>');
+        return HtmlService.createHtmlOutput('<h3>깃허브 소스 서빙 오류</h3><p>' + fetchErr.toString() + '</p>');
       }
     }
-    
-    return HtmlService.createHtmlOutput('<h3>포켓 필드 어드벤처 API 서버 동작 중 🔴</h3><p>Code.gs API 백엔드가 준비되었습니다.</p>');
+    return HtmlService.createHtmlOutput('<h3>포켓 필드 어드벤처 API 서버 🔴</h3>');
   }
 }
 
@@ -100,10 +89,6 @@ function routeAction(action, token, payload) {
       return { ok: false, error: { message: '알 수 없는 요청 액션입니다: ' + action } };
   }
 }
-
-// ==========================================
-// DB 및 비즈니스 로직 함수 모듈
-// ==========================================
 
 function getDb() { return SpreadsheetApp.getActiveSpreadsheet(); }
 function getSheet(sheetName) {
@@ -577,38 +562,6 @@ function recalculateTeamPoints(teamId) {
   }
 }
 
-function adminUpsertMission(token, payload) {
-  try {
-    var auth = verifyToken(token);
-    if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한 필요' } };
-    var missionsSheet = getSheet('Missions');
-    var missions = getSheetObjects('Missions');
-    var missionId = payload.mission_id;
-    var slotsJson = JSON.stringify(payload.slots || []);
-    var slotCount = (payload.slots || []).length;
-
-    if (missionId) {
-      for (var i = 0; i < missions.length; i++) {
-        if (missions[i].mission_id === missionId) {
-          var r = missions[i]._rowIndex;
-          missionsSheet.getRange(r, 2).setValue(payload.title);
-          missionsSheet.getRange(r, 3).setValue(payload.description);
-          missionsSheet.getRange(r, 4).setValue(payload.points);
-          missionsSheet.getRange(r, 5).setValue(slotCount);
-          missionsSheet.getRange(r, 6).setValue(slotsJson);
-          missionsSheet.getRange(r, 7).setValue(payload.acquire_type);
-          missionsSheet.getRange(r, 8).setValue(payload.ball_type || 'normal');
-          missionsSheet.getRange(r, 11).setValue(payload.status || 'draft');
-          return { ok: true, data: { message: '미션 수정 완료' } };
-        }
-      }
-    }
-    var newId = 'Q' + ('00' + (missions.length + 1)).slice(-3);
-    missionsSheet.appendRow([newId, payload.title, payload.description, payload.points, slotCount, slotsJson, payload.acquire_type || 'gacha', payload.ball_type || 'normal', '', '', payload.status || 'open']);
-    return { ok: true, data: { message: '새 미션 [' + newId + '] 등록 완료' } };
-  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
-}
-
 function adminUpsertMembers(token, memberList) {
   try {
     var auth = verifyToken(token);
@@ -622,41 +575,6 @@ function adminUpsertMembers(token, memberList) {
       membersSheet.appendRow([newId, item.name, item.class_info || '', 'member', '', '', false, new Date().toISOString()]);
     }
     return { ok: true, data: { message: memberList.length + '명 추가 완료' } };
-  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
-}
-
-function adminRandomAssign(token, payload) {
-  try {
-    var auth = verifyToken(token);
-    if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한 필요' } };
-    var membersSheet = getSheet('Members');
-    var members = getSheetObjects('Members');
-    var teams = getSheetObjects('Teams');
-    var unassigned = [];
-    for (var i = 0; i < members.length; i++) {
-      if (!members[i].team_id && members[i].role !== 'admin') unassigned.push(members[i]);
-    }
-    if (unassigned.length === 0) return { ok: false, error: { message: '미배정 학생 없음' } };
-    if (teams.length > 0) {
-      for (var u = 0; u < unassigned.length; u++) {
-        var targetTeam = teams[u % teams.length];
-        membersSheet.getRange(unassigned[u]._rowIndex, 5).setValue(targetTeam.team_id);
-      }
-      return { ok: true, data: { message: unassigned.length + '명 자동 배치 완료' } };
-    }
-    return { ok: false, error: { message: '배정할 팀 없음' } };
-  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
-}
-
-function adminAdjustPoints(token, payload) {
-  try {
-    var auth = verifyToken(token);
-    if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한 필요' } };
-    var pointsSheet = getSheet('Points');
-    pointsSheet.appendRow(['P_' + Utilities.getUuid().substring(0, 8), payload.teamId, parseInt(payload.delta || '0', 10), payload.reason || '수동 조정', '', auth.memberId, new Date().toISOString()]);
-    recalculateTeamPoints(payload.teamId);
-    CacheService.getScriptCache().remove('RANKING_DATA');
-    return { ok: true, data: { message: '포인트 조정 완료' } };
   } catch (err) { return { ok: false, error: { message: err.toString() } }; }
 }
 
@@ -674,22 +592,5 @@ function adminUpdateConfig(token, payload) {
       if (!found) configSheet.appendRow([key, payload[key], '']);
     }
     return { ok: true, data: { message: '설정 저장 완료' } };
-  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
-}
-
-function adminPurgeData(token) {
-  try {
-    var auth = verifyToken(token);
-    if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한 필요' } };
-    var membersSheet = getSheet('Members');
-    var members = getSheetObjects('Members');
-    for (var i = 0; i < members.length; i++) {
-      if (members[i].role !== 'admin') {
-        membersSheet.getRange(members[i]._rowIndex, 2).setValue('학생_' + members[i].member_id);
-        membersSheet.getRange(members[i]._rowIndex, 3).setValue('');
-        membersSheet.getRange(members[i]._rowIndex, 6).setValue('');
-      }
-    }
-    return { ok: true, data: { message: '개인정보 파기 완료' } };
   } catch (err) { return { ok: false, error: { message: err.toString() } }; }
 }

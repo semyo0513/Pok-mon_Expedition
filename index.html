@@ -3,368 +3,2139 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🎮 포켓 필드 어드벤처 - Pocket Field Adventure</title>
-  <?!= include('css'); ?>
+  <meta name="description" content="포켓 필드 어드벤처 - 학교 현장체험학습 게이미피케이션 플랫폼">
+  <title>🎮 포켓 필드 어드벤처 - POCKET FIELD ADVENTURE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/NeoDunggeunmo.css">
+
+  <style>
+  /* ==========================================================================
+     🎮 POCKET FIELD ADVENTURE - POKEMON GOLD GBC AUTHENTIC RETRO UI
+     Game Boy Color 160x144 pixel-perfect homage with screen transitions
+     ========================================================================== */
+
+  :root {
+    /* GBC Pokemon Gold 4-tone palette */
+    --gbc-darkest: #081820;
+    --gbc-dark: #346856;
+    --gbc-light: #88c070;
+    --gbc-lightest: #e0f8d0;
+    
+    /* Pokemon Gold accent colors */
+    --gold-primary: #f8d030;
+    --gold-dark: #c8a008;
+    --gold-glow: #fff8b8;
+    --red-pokeball: #f85030;
+    --red-dark: #c04020;
+    --blue-water: #3890f8;
+    --blue-dark: #2060a8;
+    --white-clean: #f8f8f8;
+    
+    /* UI Colors */
+    --border-outer: #181818;
+    --border-inner: #505050;
+    --menu-bg: #f8f8f8;
+    --menu-border: #383838;
+    --menu-text: #181818;
+    --menu-shadow: #a8a8a8;
+    
+    --font-pixel: 'Press Start 2P', monospace;
+    --font-game: 'NeoDunggeunmo', monospace;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    image-rendering: pixelated;
+  }
+
+  /* ===== BODY & BACKGROUND ===== */
+  body {
+    background: #2a2a3a;
+    background-image: 
+      repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 8px;
+    overflow: hidden;
+    font-family: var(--font-game);
+  }
+
+  /* ===== GAME BOY COLOR SHELL ===== */
+  .gbc-shell {
+    width: 100%;
+    max-width: 420px;
+    height: 96vh;
+    max-height: 780px;
+    background: linear-gradient(180deg, #c8b060 0%, #a89048 50%, #988038 100%);
+    border-radius: 20px 20px 40px 40px;
+    padding: 14px 14px 20px 14px;
+    box-shadow: 
+      0 0 0 3px #786828,
+      0 8px 32px rgba(0,0,0,0.7),
+      inset 0 1px 0 rgba(255,255,255,0.3);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Power indicator */
+  .gbc-shell::before {
+    content: '●';
+    position: absolute;
+    top: 8px;
+    left: 20px;
+    color: #40d040;
+    font-size: 8px;
+    text-shadow: 0 0 6px #40d040, 0 0 12px #40d040;
+    animation: power-blink 3s ease-in-out infinite;
+  }
+
+  @keyframes power-blink {
+    0%, 90%, 100% { opacity: 1; }
+    95% { opacity: 0.4; }
+  }
+
+  /* GBC Top Label */
+  .gbc-label {
+    text-align: center;
+    padding: 2px 0 6px 0;
+    font-family: var(--font-pixel);
+    font-size: 7px;
+    color: #483818;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .gbc-label span {
+    color: #a02020;
+    font-weight: bold;
+  }
+
+  /* ===== LCD SCREEN BEZEL ===== */
+  .gbc-bezel {
+    background: #404858;
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 
+      inset 0 3px 8px rgba(0,0,0,0.6),
+      0 1px 0 rgba(255,255,255,0.15);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Scanline overlay on bezel */
+  .gbc-bezel::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.06) 2px,
+      rgba(0,0,0,0.06) 4px
+    );
+    pointer-events: none;
+    z-index: 5;
+    border-radius: 4px;
+  }
+
+  /* ===== LCD SCREEN ===== */
+  .gbc-screen {
+    background: var(--gbc-lightest);
+    border: 3px solid var(--gbc-darkest);
+    border-radius: 4px;
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Pixel grid overlay */
+  .gbc-screen::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+      repeating-linear-gradient(90deg, rgba(0,0,0,0.02) 0px, transparent 1px, transparent 3px),
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.02) 0px, transparent 1px, transparent 3px);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Screen transition overlay */
+  .screen-transition {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--gbc-darkest);
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0;
+    transition: none;
+  }
+
+  .screen-transition.active {
+    animation: screen-fade 0.5s ease-in-out;
+  }
+
+  @keyframes screen-fade {
+    0% { opacity: 0; }
+    40% { opacity: 1; }
+    60% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* Wipe transition */
+  .screen-transition.wipe {
+    animation: screen-wipe 0.6s steps(8);
+  }
+
+  @keyframes screen-wipe {
+    0% { clip-path: inset(0 100% 0 0); opacity: 1; }
+    50% { clip-path: inset(0 0 0 0); opacity: 1; }
+    51% { background: var(--gbc-lightest); clip-path: inset(0 0 0 0); opacity: 1; }
+    100% { clip-path: inset(0 0 0 100%); opacity: 0; }
+  }
+
+  /* ===== TOP HUD BAR ===== */
+  .hud-bar {
+    background: var(--gbc-darkest);
+    color: var(--gbc-lightest);
+    font-family: var(--font-game);
+    font-size: 13px;
+    padding: 4px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--gbc-dark);
+    z-index: 3;
+    min-height: 28px;
+  }
+
+  .hud-left {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .hud-pokeball {
+    width: 14px; height: 14px;
+    display: inline-block;
+    background: radial-gradient(circle at 50% 55%, #fff 3px, #181818 3px, #181818 4px, var(--red-pokeball) 4px, var(--red-pokeball) 50%, #181818 50%, #181818 52%, #f8f8f8 52%);
+    border-radius: 50%;
+    border: 1px solid #181818;
+    animation: hud-ball-spin 4s linear infinite;
+  }
+
+  @keyframes hud-ball-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .hud-title {
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .hud-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .hud-badge {
+    background: var(--gold-primary);
+    color: var(--gbc-darkest);
+    font-size: 10px;
+    font-weight: bold;
+    padding: 1px 6px;
+    border: 1px solid var(--gold-dark);
+    border-radius: 2px;
+  }
+
+  .sound-toggle {
+    background: none;
+    border: 1px solid var(--gbc-light);
+    color: var(--gbc-lightest);
+    font-size: 12px;
+    width: 22px; height: 22px;
+    cursor: pointer;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sound-toggle:active { background: var(--gbc-dark); }
+
+  /* ===== MAIN CONTENT AREA ===== */
+  .game-viewport {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Custom scrollbar (pixel style) */
+  .game-viewport::-webkit-scrollbar { width: 6px; }
+  .game-viewport::-webkit-scrollbar-track { background: var(--gbc-light); }
+  .game-viewport::-webkit-scrollbar-thumb { 
+    background: var(--gbc-dark); 
+    border: 1px solid var(--gbc-darkest);
+  }
+
+  /* ===== VIEW SCREENS ===== */
+  .view-screen {
+    display: none;
+    flex-direction: column;
+    min-height: 100%;
+    animation: screen-enter 0.3s ease-out;
+  }
+  .view-screen.active {
+    display: flex;
+  }
+
+  @keyframes screen-enter {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== S1: TITLE SCREEN ===== */
+  .title-screen {
+    background: linear-gradient(180deg, #88c070 0%, #58a050 40%, #306830 100%);
+    padding: 16px;
+    text-align: center;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+  }
+
+  /* Animated grass tiles at bottom */
+  .title-screen::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    height: 48px;
+    background: 
+      repeating-linear-gradient(90deg, 
+        var(--gbc-dark) 0px, var(--gbc-dark) 12px, 
+        var(--gbc-darkest) 12px, var(--gbc-darkest) 14px, 
+        var(--gbc-dark) 14px, var(--gbc-dark) 26px,
+        var(--gbc-darkest) 26px, var(--gbc-darkest) 28px);
+    animation: grass-scroll 2s linear infinite;
+  }
+
+  @keyframes grass-scroll {
+    from { background-position-x: 0; }
+    to { background-position-x: 28px; }
+  }
+
+  /* Big Pokeball sprite */
+  .title-pokeball {
+    width: 80px; height: 80px;
+    margin: 0 auto 12px auto;
+    position: relative;
+    animation: title-ball-bounce 1.5s ease-in-out infinite;
+  }
+
+  .title-pokeball .ball-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 38px;
+    background: var(--red-pokeball);
+    border: 4px solid var(--gbc-darkest);
+    border-radius: 40px 40px 0 0;
+    border-bottom: none;
+  }
+  .title-pokeball .ball-mid {
+    position: absolute;
+    top: 36px; left: 0; right: 0;
+    height: 8px;
+    background: var(--gbc-darkest);
+  }
+  .title-pokeball .ball-mid::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px; height: 20px;
+    background: var(--white-clean);
+    border: 4px solid var(--gbc-darkest);
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px var(--white-clean);
+  }
+  .title-pokeball .ball-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 38px;
+    background: var(--white-clean);
+    border: 4px solid var(--gbc-darkest);
+    border-radius: 0 0 40px 40px;
+    border-top: none;
+  }
+
+  @keyframes title-ball-bounce {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    30% { transform: translateY(-20px) rotate(-8deg); }
+    50% { transform: translateY(0) rotate(0deg); }
+    60% { transform: translateY(-8px) rotate(4deg); }
+    75% { transform: translateY(0) rotate(0deg); }
+  }
+
+  /* Title sparkle effect */
+  .title-pokeball::after {
+    content: '✦';
+    position: absolute;
+    top: -6px; right: -6px;
+    color: var(--gold-primary);
+    font-size: 16px;
+    animation: sparkle 1s ease-in-out infinite;
+  }
+
+  @keyframes sparkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(0.5); }
+  }
+
+  .title-text {
+    font-family: var(--font-pixel);
+    font-size: 16px;
+    color: var(--gold-primary);
+    text-shadow: 
+      2px 2px 0 var(--gbc-darkest),
+      -1px -1px 0 var(--gbc-darkest),
+      1px -1px 0 var(--gbc-darkest),
+      -1px 1px 0 var(--gbc-darkest),
+      0 3px 0 var(--gold-dark);
+    letter-spacing: 1px;
+    line-height: 1.4;
+  }
+
+  .title-sub {
+    font-family: var(--font-game);
+    font-size: 14px;
+    color: var(--gbc-lightest);
+    text-shadow: 1px 1px 0 var(--gbc-darkest);
+  }
+
+  .title-version {
+    font-family: var(--font-pixel);
+    font-size: 8px;
+    color: var(--gbc-lightest);
+    opacity: 0.7;
+    margin-top: 4px;
+  }
+
+  /* Blinking "Press Start" style text */
+  .press-start {
+    font-family: var(--font-pixel);
+    font-size: 9px;
+    color: var(--gbc-darkest);
+    margin-top: 12px;
+    animation: blink-text 1.2s steps(2) infinite;
+  }
+
+  @keyframes blink-text {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  /* ===== GBC STYLE MENU BOX ===== */
+  .gbc-menu {
+    background: var(--menu-bg);
+    border: 3px solid var(--menu-border);
+    border-radius: 4px;
+    box-shadow: 
+      3px 3px 0 var(--menu-shadow),
+      inset 0 0 0 2px var(--menu-bg),
+      inset 0 0 0 4px var(--menu-border);
+    margin: 8px;
+    overflow: hidden;
+  }
+
+  .gbc-menu-title {
+    background: var(--gbc-darkest);
+    color: var(--gold-primary);
+    font-family: var(--font-game);
+    font-size: 14px;
+    font-weight: bold;
+    padding: 6px 10px;
+    border-bottom: 2px solid var(--menu-border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .gbc-menu-body {
+    padding: 10px;
+  }
+
+  /* ===== GBC MENU ITEM / SELECT ARROW ===== */
+  .menu-item {
+    font-family: var(--font-game);
+    font-size: 15px;
+    color: var(--menu-text);
+    padding: 10px 10px 10px 28px;
+    border: 2px solid transparent;
+    border-bottom: 2px solid #d8d8d8;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .menu-item:last-child {
+    border-bottom: none;
+  }
+
+  .menu-item::before {
+    content: '▶';
+    position: absolute;
+    left: 8px;
+    font-size: 10px;
+    color: var(--gbc-darkest);
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+
+  .menu-item:hover, .menu-item:active {
+    background: var(--gbc-lightest);
+  }
+  .menu-item:hover::before, .menu-item:active::before {
+    opacity: 1;
+    animation: arrow-bounce 0.5s steps(2) infinite;
+  }
+
+  @keyframes arrow-bounce {
+    0%, 50% { transform: translateX(0); }
+    51%, 100% { transform: translateX(3px); }
+  }
+
+  .menu-item .item-icon {
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+  }
+
+  .menu-item .item-label {
+    font-weight: bold;
+  }
+
+  /* Color variants */
+  .menu-item--gold { border-left: 4px solid var(--gold-primary); }
+  .menu-item--red { border-left: 4px solid var(--red-pokeball); }
+  .menu-item--blue { border-left: 4px solid var(--blue-water); }
+
+  /* ===== GBC DIALOG BOX (RPG text box) ===== */
+  .gbc-dialog {
+    background: var(--menu-bg);
+    border: 3px solid var(--menu-border);
+    border-radius: 4px;
+    box-shadow: 3px 3px 0 var(--menu-shadow);
+    margin: 8px;
+    padding: 10px 12px;
+    font-family: var(--font-game);
+    font-size: 14px;
+    color: var(--menu-text);
+    line-height: 1.6;
+    position: relative;
+  }
+
+  /* Dialog arrow indicator */
+  .gbc-dialog::after {
+    content: '▼';
+    position: absolute;
+    bottom: 4px;
+    right: 8px;
+    font-size: 10px;
+    color: var(--gbc-dark);
+    animation: dialog-arrow 1s steps(2) infinite;
+  }
+
+  @keyframes dialog-arrow {
+    0%, 49% { transform: translateY(0); }
+    50%, 100% { transform: translateY(3px); }
+  }
+
+  .gbc-dialog .speaker {
+    font-weight: bold;
+    color: var(--gbc-darkest);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .gbc-dialog .speaker::before {
+    content: '🎓';
+    font-size: 14px;
+  }
+
+  /* ===== GBC BUTTONS ===== */
+  .gbc-btn {
+    font-family: var(--font-game);
+    font-size: 14px;
+    font-weight: bold;
+    padding: 10px 14px;
+    width: 100%;
+    border: 3px solid var(--gbc-darkest);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 
+      3px 3px 0 rgba(0,0,0,0.4),
+      inset -2px -2px 0 rgba(0,0,0,0.2),
+      inset 2px 2px 0 rgba(255,255,255,0.3);
+    color: var(--gbc-darkest);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.05s, box-shadow 0.05s;
+  }
+
+  .gbc-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 
+      1px 1px 0 rgba(0,0,0,0.4),
+      inset -2px -2px 0 rgba(0,0,0,0.2),
+      inset 2px 2px 0 rgba(255,255,255,0.3);
+  }
+
+  .gbc-btn--gold {
+    background: linear-gradient(180deg, var(--gold-primary), var(--gold-dark));
+  }
+  .gbc-btn--red {
+    background: linear-gradient(180deg, #f86058, var(--red-dark));
+    color: #fff;
+  }
+  .gbc-btn--blue {
+    background: linear-gradient(180deg, #58a0f8, var(--blue-dark));
+    color: #fff;
+  }
+  .gbc-btn--green {
+    background: linear-gradient(180deg, var(--gbc-light), var(--gbc-dark));
+  }
+  .gbc-btn--white {
+    background: linear-gradient(180deg, #f8f8f8, #d0d0d0);
+  }
+
+  /* ===== GBC INPUT FIELDS ===== */
+  .gbc-input {
+    font-family: var(--font-game);
+    font-size: 14px;
+    padding: 8px 10px;
+    width: 100%;
+    background: var(--gbc-lightest);
+    border: 3px solid var(--gbc-darkest);
+    border-radius: 2px;
+    color: var(--gbc-darkest);
+    outline: none;
+    box-shadow: inset 2px 2px 0 rgba(0,0,0,0.15);
+  }
+
+  .gbc-input:focus {
+    border-color: var(--gold-primary);
+    background: #fff;
+    box-shadow: inset 2px 2px 0 rgba(0,0,0,0.1), 0 0 0 2px rgba(248,208,48,0.3);
+  }
+
+  .gbc-input::placeholder {
+    color: var(--gbc-dark);
+    opacity: 0.6;
+  }
+
+  .gbc-select {
+    font-family: var(--font-game);
+    font-size: 13px;
+    padding: 8px 10px;
+    width: 100%;
+    background: var(--gbc-lightest);
+    border: 3px solid var(--gbc-darkest);
+    border-radius: 2px;
+    color: var(--gbc-darkest);
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23181818' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+  }
+
+  .field-label {
+    font-family: var(--font-game);
+    font-size: 12px;
+    color: var(--gbc-dark);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+    margin-top: 8px;
+  }
+
+  /* ===== FORM LAYOUT HELPERS ===== */
+  .form-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .btn-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  /* ===== SCREEN BACKGROUNDS ===== */
+  .screen-bg-town {
+    background: linear-gradient(180deg, #a8d8f8 0%, #88c070 30%, #58a050 100%);
+    min-height: 100%;
+  }
+  .screen-bg-forest {
+    background: 
+      repeating-linear-gradient(90deg, rgba(48,104,48,0.15) 0px, transparent 16px, transparent 32px),
+      linear-gradient(180deg, #58a050 0%, #306830 60%, #204020 100%);
+    min-height: 100%;
+  }
+  .screen-bg-gym {
+    background: linear-gradient(180deg, #f8d8a8 0%, #d8a868 40%, #b88848 100%);
+    min-height: 100%;
+  }
+  .screen-bg-lab {
+    background: linear-gradient(180deg, #c8d8e8 0%, #98a8b8 50%, #687888 100%);
+    min-height: 100%;
+  }
+
+  /* ===== S7: WILD GRASS MISSION GRID ===== */
+  .wild-area-header {
+    background: rgba(8,24,32,0.85);
+    color: var(--gbc-lightest);
+    font-family: var(--font-game);
+    font-size: 14px;
+    padding: 8px 12px;
+    text-align: center;
+    border-bottom: 3px solid var(--gbc-dark);
+  }
+  .wild-area-header .area-name {
+    color: var(--gold-primary);
+    font-weight: bold;
+    font-size: 15px;
+  }
+
+  .grass-field {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .wild-tile {
+    background: var(--gbc-lightest);
+    border: 3px solid var(--gbc-darkest);
+    border-radius: 4px;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.1s;
+  }
+
+  .wild-tile:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  }
+
+  /* Grass animation inside tile */
+  .wild-tile::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 16px;
+    background: repeating-linear-gradient(90deg,
+      var(--gbc-light) 0px, var(--gbc-light) 6px,
+      var(--gbc-dark) 6px, var(--gbc-dark) 8px);
+    animation: tile-grass 1.5s steps(2) infinite;
+    opacity: 0.6;
+  }
+
+  @keyframes tile-grass {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(8px); }
+  }
+
+  .wild-tile.acquired {
+    background: var(--gold-glow);
+    border-color: var(--gold-dark);
+  }
+  .wild-tile.acquired::before {
+    background: repeating-linear-gradient(90deg,
+      var(--gold-primary) 0px, var(--gold-primary) 6px,
+      var(--gold-dark) 6px, var(--gold-dark) 8px);
+  }
+
+  /* Pokeball sprite in tile */
+  .tile-ball {
+    width: 36px; height: 36px;
+    margin: 0 auto 6px auto;
+    background: radial-gradient(circle at 50% 55%, #fff 4px, #181818 4px, #181818 5px, var(--red-pokeball) 5px, var(--red-pokeball) 50%, #181818 50%, #181818 52%, #f8f8f8 52%);
+    border-radius: 50%;
+    border: 2px solid var(--gbc-darkest);
+    animation: wild-shake 3s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
+  }
+
+  .tile-ball.great {
+    background: radial-gradient(circle at 50% 55%, #fff 4px, #181818 4px, #181818 5px, var(--blue-water) 5px, var(--blue-water) 50%, #181818 50%, #181818 52%, #f8f8f8 52%);
+  }
+  .tile-ball.ultra {
+    background: radial-gradient(circle at 50% 55%, #fff 4px, #181818 4px, #181818 5px, var(--gold-primary) 5px, var(--gold-primary) 50%, #181818 50%, #181818 52%, #f8f8f8 52%);
+  }
+
+  @keyframes wild-shake {
+    0%, 80%, 100% { transform: rotate(0deg); }
+    85% { transform: rotate(-10deg); }
+    90% { transform: rotate(10deg); }
+    95% { transform: rotate(-5deg); }
+  }
+
+  .tile-title {
+    font-family: var(--font-game);
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--gbc-darkest);
+    position: relative;
+    z-index: 1;
+  }
+
+  .tile-exp {
+    font-family: var(--font-game);
+    font-size: 11px;
+    color: var(--gbc-dark);
+    font-weight: bold;
+    position: relative;
+    z-index: 1;
+  }
+
+  .tile-tag-get {
+    position: absolute;
+    top: 4px; right: 4px;
+    background: var(--gold-primary);
+    color: var(--gbc-darkest);
+    font-family: var(--font-pixel);
+    font-size: 7px;
+    padding: 2px 5px;
+    border: 1px solid var(--gold-dark);
+    border-radius: 2px;
+    z-index: 2;
+  }
+
+  /* ===== S9: BAG / INVENTORY ===== */
+  .bag-item {
+    background: var(--menu-bg);
+    border: 3px solid var(--menu-border);
+    border-radius: 4px;
+    box-shadow: 2px 2px 0 var(--menu-shadow);
+    margin: 0 8px 8px 8px;
+    padding: 10px 12px;
+    font-family: var(--font-game);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .bag-item-ball {
+    width: 28px; height: 28px;
+    background: radial-gradient(circle at 50% 55%, #fff 3px, #181818 3px, #181818 4px, var(--red-pokeball) 4px, var(--red-pokeball) 50%, #181818 50%, #181818 52%, #f8f8f8 52%);
+    border-radius: 50%;
+    border: 2px solid var(--gbc-darkest);
+    flex-shrink: 0;
+  }
+
+  .bag-item-info {
+    flex: 1;
+  }
+
+  .bag-item-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--gbc-darkest);
+  }
+
+  .bag-item-detail {
+    font-size: 11px;
+    color: var(--gbc-dark);
+    margin-top: 2px;
+  }
+
+  .bag-item-status {
+    font-family: var(--font-pixel);
+    font-size: 7px;
+    padding: 3px 6px;
+    border-radius: 2px;
+    border: 1px solid;
+    flex-shrink: 0;
+  }
+  .status-clear { background: var(--gbc-light); border-color: var(--gbc-dark); color: var(--gbc-darkest); }
+  .status-fail { background: #f88888; border-color: var(--red-dark); color: #fff; }
+  .status-pending { background: var(--gold-primary); border-color: var(--gold-dark); color: var(--gbc-darkest); }
+
+  /* ===== S10: LEADERBOARD ===== */
+  .rank-entry {
+    background: var(--menu-bg);
+    border: 3px solid var(--menu-border);
+    border-radius: 4px;
+    box-shadow: 2px 2px 0 var(--menu-shadow);
+    margin: 0 8px 8px 8px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-game);
+  }
+
+  .rank-entry.champion {
+    border-color: var(--gold-dark);
+    background: var(--gold-glow);
+    box-shadow: 2px 2px 0 var(--gold-dark), 0 0 12px rgba(248,208,48,0.3);
+  }
+
+  .rank-num {
+    width: 32px; height: 32px;
+    background: var(--gbc-darkest);
+    color: var(--gold-primary);
+    font-family: var(--font-pixel);
+    font-size: 11px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--gold-dark);
+    flex-shrink: 0;
+  }
+
+  .rank-info {
+    flex: 1;
+  }
+  .rank-team-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--gbc-darkest);
+  }
+  .rank-members {
+    font-size: 11px;
+    color: var(--gbc-dark);
+    margin-top: 2px;
+  }
+  .rank-points {
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    color: var(--gold-dark);
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  /* ===== S11: ADMIN DASHBOARD ===== */
+  .admin-tab-bar {
+    display: flex;
+    gap: 4px;
+    padding: 8px 8px 0 8px;
+    flex-wrap: wrap;
+  }
+
+  .admin-tab-btn {
+    font-family: var(--font-game);
+    font-size: 12px;
+    font-weight: bold;
+    padding: 6px 10px;
+    background: var(--gbc-light);
+    border: 2px solid var(--gbc-darkest);
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    color: var(--gbc-darkest);
+  }
+  .admin-tab-btn.active {
+    background: var(--gold-primary);
+    color: var(--gbc-darkest);
+    border-color: var(--gold-dark);
+  }
+
+  .admin-panel {
+    margin: 0 8px 8px 8px;
+    background: var(--menu-bg);
+    border: 3px solid var(--menu-border);
+    border-radius: 0 4px 4px 4px;
+    padding: 10px;
+    box-shadow: 2px 2px 0 var(--menu-shadow);
+  }
+
+  .admin-pending-card {
+    background: var(--gbc-lightest);
+    border: 2px solid var(--gbc-dark);
+    border-radius: 4px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    font-family: var(--font-game);
+  }
+
+  .admin-pending-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--gbc-darkest);
+  }
+  .admin-pending-detail {
+    font-size: 11px;
+    color: var(--gbc-dark);
+    margin-top: 4px;
+  }
+  .admin-btn-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .admin-btn-sm {
+    font-family: var(--font-game);
+    font-size: 12px;
+    font-weight: bold;
+    padding: 6px 12px;
+    border: 2px solid var(--gbc-darkest);
+    border-radius: 3px;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+    flex: 1;
+    text-align: center;
+  }
+  .admin-btn-sm:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  }
+  .admin-btn-sm--approve { background: var(--gbc-light); color: var(--gbc-darkest); }
+  .admin-btn-sm--reject { background: #f88888; color: #fff; }
+
+  /* ===== MODAL OVERLAY ===== */
+  .modal-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(8, 24, 32, 0.85);
+    z-index: 30;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+  }
+
+  .modal-box {
+    background: var(--menu-bg);
+    border: 4px solid var(--menu-border);
+    border-radius: 6px;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    width: 100%;
+    max-width: 340px;
+    max-height: 80%;
+    overflow-y: auto;
+    padding: 14px;
+    animation: modal-pop 0.2s ease-out;
+  }
+
+  @keyframes modal-pop {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* ===== BOTTOM NAVIGATION (D-PAD STYLE) ===== */
+  .gbc-nav {
+    background: rgba(8,24,32,0.95);
+    border-top: 3px solid var(--gbc-dark);
+    display: flex;
+    justify-content: space-around;
+    padding: 4px 0;
+    z-index: 10;
+  }
+
+  .nav-item {
+    background: none;
+    border: none;
+    color: var(--gbc-light);
+    font-family: var(--font-game);
+    font-size: 11px;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: color 0.1s;
+  }
+  .nav-item .nav-icon {
+    font-size: 18px;
+  }
+  .nav-item.active {
+    color: var(--gold-primary);
+    background: rgba(248,208,48,0.15);
+  }
+
+  /* ===== D-PAD & BUTTONS DECORATION (bottom of shell) ===== */
+  .gbc-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px 4px 16px;
+  }
+
+  .dpad {
+    width: 56px; height: 56px;
+    position: relative;
+  }
+  .dpad-h, .dpad-v {
+    position: absolute;
+    background: #282828;
+    border-radius: 3px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .dpad-h {
+    width: 56px; height: 18px;
+    top: 19px; left: 0;
+  }
+  .dpad-v {
+    width: 18px; height: 56px;
+    top: 0; left: 19px;
+  }
+  .dpad-center {
+    position: absolute;
+    width: 14px; height: 14px;
+    background: #202020;
+    border-radius: 50%;
+    top: 21px; left: 21px;
+  }
+
+  .ab-buttons {
+    display: flex;
+    gap: 10px;
+    transform: rotate(-15deg);
+  }
+  .btn-circle {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 2px solid #202020;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-pixel);
+    font-size: 8px;
+    color: #888;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.5), inset 0 -2px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .btn-a { background: #a02020; color: #e8b0b0; }
+  .btn-b { background: #a02020; color: #e8b0b0; }
+
+  /* ===== UTILITIES ===== */
+  .hidden { display: none !important; }
+  .mt-6 { margin-top: 6px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .text-center { text-align: center; }
+  .px-8 { padding-left: 8px; padding-right: 8px; }
+
+  /* ===== ENCOUNTER ANIMATION ===== */
+  .encounter-flash {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 40;
+    pointer-events: none;
+  }
+  .encounter-flash.active {
+    animation: encounter-stripes 0.8s steps(1);
+  }
+
+  @keyframes encounter-stripes {
+    0% { background: transparent; }
+    5% { background: var(--gbc-darkest); }
+    10% { background: transparent; }
+    15% { background: var(--gbc-darkest); }
+    20% { background: transparent; }
+    25% { background: var(--gbc-darkest); }
+    30% { background: transparent; }
+    35% { background: var(--gbc-darkest); }
+    40% { background: transparent; }
+    50% { background: var(--gbc-darkest); }
+    100% { background: transparent; }
+  }
+
+  /* ===== LOADING DOTS ===== */
+  .loading-dots::after {
+    content: '';
+    animation: loading-dots 1s steps(3) infinite;
+  }
+  @keyframes loading-dots {
+    0% { content: '.'; }
+    33% { content: '..'; }
+    66% { content: '...'; }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-height: 640px) {
+    .gbc-controls { display: none; }
+    .gbc-shell { border-radius: 12px; padding: 8px; max-height: 98vh; }
+    .gbc-label { display: none; }
+  }
+
+  @media (max-width: 380px) {
+    .gbc-shell { padding: 6px; border-radius: 12px; }
+    .gbc-controls { display: none; }
+    .title-text { font-size: 13px; }
+  }
+  </style>
 </head>
 <body>
 
-<!-- Game Boy Handheld Console Body Shell -->
-<div class="console-outer-shell">
+<div class="gbc-shell">
 
-  <!-- Screen Bezel -->
-  <div class="console-bezel">
-    
-    <!-- Power LED -->
-    <div class="power-led-container">
-      <div class="power-led"></div>
-      <span>POWER</span>
-    </div>
+  <!-- GBC Label -->
+  <div class="gbc-label">GAME BOY <span>COLOR</span> — POCKET FIELD LV.1</div>
 
-    <!-- Bezel Logo -->
-    <div class="bezel-logo">
-      <span>GAME BOY</span>
-      <span class="gbc-color">COLOR</span>
-    </div>
+  <!-- LCD Bezel -->
+  <div class="gbc-bezel">
 
-    <!-- CRT Game Screen Viewport -->
-    <div id="app-viewport">
+    <!-- LCD Screen -->
+    <div class="gbc-screen" id="gbc-screen">
 
-      <!-- Top Game HUD Bar -->
-      <div class="game-hud">
-        <div class="hud-player-info">
-          <span>🔴 POCKET FIELD</span>
-          <span class="hud-level-badge" id="hud-level-tag">LV.1</span>
+      <!-- Screen Transition Overlay -->
+      <div class="screen-transition" id="screen-transition"></div>
+      <!-- Encounter Flash -->
+      <div class="encounter-flash" id="encounter-flash"></div>
+
+      <!-- HUD Bar -->
+      <div class="hud-bar">
+        <div class="hud-left">
+          <span class="hud-pokeball"></span>
+          <span class="hud-title">POCKET FIELD</span>
         </div>
-        <div class="hud-exp-container">
-          <span>EXP</span>
-          <div class="exp-bar-bg">
-            <div class="exp-bar-fill" id="hud-exp-fill"></div>
-          </div>
-          <button class="sound-toggle-btn" onclick="AudioFX.toggleSound()" title="사운드 토글">🔊</button>
+        <div class="hud-right">
+          <span class="hud-badge" id="hud-role-tag">TRAINER</span>
+          <button class="sound-toggle" onclick="AudioFX.toggleSound()" title="사운드">♪</button>
         </div>
       </div>
 
-      <!-- Main Game Viewport Router -->
-      <main class="gb-main" id="main-content">
+      <!-- Game Viewport -->
+      <div class="game-viewport" id="game-viewport">
 
-        <!-- ====================================================================
-             S1: 게임 시작 타이틀 화면 (Game Title Screen)
-             ==================================================================== -->
-        <section id="screen-s1" class="view-screen">
-          <div class="gb-dialog-box dark text-center mt-10" style="border-color: #f8d030;">
-            <h1 style="font-size: 20px; color: #f8d030; text-shadow: 2px 2px 0 #e03838; font-family: var(--font-pixel-en); margin-bottom: 4px;">
-              POCKET FIELD
-            </h1>
-            <h2 style="font-size: 16px; color: #ffffff;">ADVENTURE</h2>
-            <div style="font-size: 11px; margin-top: 6px; color: #a3ab78;">2026 현장체험학습 미션 플랫폼</div>
-          </div>
-
-          <div class="gb-dialog-box mt-10">
-            <div class="dialog-text" id="s1-dialog-text">
-              "야생의 현장체험학습 미션이 나타났다! 원하는 모드의 스타트 버튼을 눌러 모험을 시작하자!"
+        <!-- ============================================================
+             S1: TITLE SCREEN
+             ============================================================ -->
+        <section id="screen-s1" class="view-screen active">
+          <div class="title-screen">
+            <div class="title-pokeball">
+              <div class="ball-top"></div>
+              <div class="ball-mid"></div>
+              <div class="ball-bottom"></div>
             </div>
-            <div class="dialog-arrow">▼</div>
-          </div>
 
-          <div style="display: flex; flex-direction: column; gap: 8px;" class="mt-14">
-            <button class="game-btn game-btn-gold game-btn-block" onclick="AudioFX.playClick(); Router.navigate('s2')">
-              <span>🧢</span> 트레이너 팀장 스타트
-            </button>
-            <button class="game-btn game-btn-blue game-btn-block" onclick="AudioFX.playClick(); Router.navigate('s3')">
-              <span>🎒</span> 팀원 파트너 스타트
-            </button>
-            <button class="game-btn game-btn-block" style="background: #3b2a56; color: #FFF; border-color: #f8d030;" onclick="AudioFX.playClick(); Router.navigate('s4')">
-              <span>👨‍🏫</span> 오박사(관리자) 연구소
-            </button>
+            <div class="title-text">
+              POCKET FIELD<br>ADVENTURE
+            </div>
+            <div class="title-sub">2026 현장체험학습 미션 플랫폼</div>
+            <div class="title-version">Ver 1.0 — Gold Edition</div>
+
+            <div class="press-start">▼ SELECT YOUR MODE ▼</div>
+
+            <div class="gbc-menu" style="margin-top: 8px; text-align: left;">
+              <div class="menu-item menu-item--gold" onclick="AudioFX.playClick(); Router.navigate('s2')">
+                <span class="item-icon">🧢</span>
+                <span class="item-label">트레이너 팀장 스타트</span>
+              </div>
+              <div class="menu-item menu-item--blue" onclick="AudioFX.playClick(); Router.navigate('s3')">
+                <span class="item-icon">🎒</span>
+                <span class="item-label">팀원 파트너 스타트</span>
+              </div>
+              <div class="menu-item menu-item--red" onclick="AudioFX.playClick(); Router.navigate('s4')">
+                <span class="item-icon">🔬</span>
+                <span class="item-label">오박사 연구소 (관리자)</span>
+              </div>
+            </div>
           </div>
         </section>
 
-        <!-- ====================================================================
-             S2: 팀장 로그인 화면
-             ==================================================================== -->
-        <section id="screen-s2" class="view-screen hidden">
-          <div class="gb-dialog-box">
-            <h3 style="color: #e03838;">🧢 트레이너 팀장 로그인</h3>
-            <div style="font-size: 12px; margin-top: 8px;">1. 명단에서 본인 이름을 선택하세요.</div>
-            <select id="s2-member-select" class="game-input mt-10">
-              <option value="">-- 명단 불러오는 중... --</option>
-            </select>
-
-            <div style="font-size: 12px; margin-top: 8px;">2. 팀장 코드를 입력하세요.</div>
-            <input type="text" id="s2-leader-code" class="game-input mt-10" placeholder="팀장 코드 (예: GOLD-2026)">
-
-            <div id="s2-password-group" class="hidden">
-              <div style="font-size: 12px; margin-top: 8px;">3. 비밀번호를 입력하세요.</div>
-              <input type="password" id="s2-password" class="game-input mt-10" placeholder="비밀번호">
+        <!-- ============================================================
+             S2: LEADER LOGIN
+             ============================================================ -->
+        <section id="screen-s2" class="view-screen">
+          <div class="screen-bg-town" style="padding: 10px 0;">
+            <div class="gbc-dialog">
+              <div class="speaker">오박사</div>
+              야생의 현장체험학습 미션이 나타났다! 트레이너 정보를 확인하겠다!
             </div>
 
-            <button class="game-btn game-btn-gold game-btn-block mt-14" onclick="AudioFX.playClick(); App.handleLeaderLogin()">
-              게임 접속 ▶
-            </button>
-            <button class="game-btn game-btn-block mt-10" onclick="AudioFX.playClick(); Router.navigate('s1')">
-              ◀ 뒤로가기
-            </button>
+            <div class="gbc-menu">
+              <div class="gbc-menu-title">🧢 트레이너 팀장 로그인</div>
+              <div class="gbc-menu-body form-stack">
+                <div class="field-label">▶ 본인 이름 선택</div>
+                <select id="s2-member-select" class="gbc-select">
+                  <option value="">-- 명단 불러오는 중... --</option>
+                </select>
+
+                <div class="field-label">▶ 팀장 코드 입력</div>
+                <input type="text" id="s2-leader-code" class="gbc-input" placeholder="예: GOLD-2026">
+
+                <div id="s2-password-group" class="hidden">
+                  <div class="field-label">▶ 비밀번호</div>
+                  <input type="password" id="s2-password" class="gbc-input" placeholder="비밀번호">
+                </div>
+
+                <div class="btn-stack">
+                  <button class="gbc-btn gbc-btn--gold" onclick="AudioFX.playClick(); App.handleLeaderLogin()">
+                    ▶ 게임 접속!
+                  </button>
+                  <button class="gbc-btn gbc-btn--white" onclick="AudioFX.playClick(); Router.navigate('s1')">
+                    ◀ 뒤로가기
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        <!-- 비밀번호 설정 모달 -->
-        <div id="modal-set-pw" class="modal-backdrop hidden">
-          <div class="gb-dialog-box" style="width: 100%; max-width: 340px;">
-            <h3>🔑 최초 비밀번호 설정</h3>
-            <p style="font-size: 12px; margin-top: 6px;">팀장이 사용할 비밀번호를 입력하세요.</p>
-            <input type="password" id="modal-pw-input" class="game-input mt-10" placeholder="비밀번호">
-            <input type="password" id="modal-pw-confirm" class="game-input mt-10" placeholder="비밀번호 확인">
-            <button class="game-btn game-btn-gold game-btn-block mt-14" onclick="AudioFX.playClick(); App.handleSetInitialPassword()">
-              설정 완료 및 접속
-            </button>
+        <!-- Password Setup Modal -->
+        <div id="modal-set-pw" class="modal-overlay hidden">
+          <div class="modal-box">
+            <div class="gbc-menu-title">🔑 최초 비밀번호 설정</div>
+            <div style="padding: 10px;" class="form-stack">
+              <div class="field-label">▶ 새 비밀번호</div>
+              <input type="password" id="modal-pw-input" class="gbc-input" placeholder="비밀번호 입력">
+              <div class="field-label">▶ 비밀번호 확인</div>
+              <input type="password" id="modal-pw-confirm" class="gbc-input" placeholder="다시 입력">
+              <div class="btn-stack">
+                <button class="gbc-btn gbc-btn--gold" onclick="AudioFX.playClick(); App.handleSetInitialPassword()">
+                  설정 완료 및 접속 ▶
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- ====================================================================
-             S3: 팀원 입장 화면
-             ==================================================================== -->
-        <section id="screen-s3" class="view-screen hidden">
-          <div class="gb-dialog-box">
-            <h3 style="color: #386ce0;">🎒 팀원 파트너 입장</h3>
-            <p style="font-size: 12px; margin-top: 8px;">전달받은 팀원 코드를 입력하세요.</p>
-            <input type="text" id="s3-member-code" class="game-input mt-14" placeholder="팀원 코드 (예: SILVER-2026)">
-            
-            <button class="game-btn game-btn-blue game-btn-block mt-14" onclick="AudioFX.playClick(); App.handleMemberLogin()">
-              게스트 모드 접속 ▶
-            </button>
-            <button class="game-btn game-btn-block mt-10" onclick="AudioFX.playClick(); Router.navigate('s1')">
-              ◀ 뒤로가기
-            </button>
-          </div>
-        </section>
-
-        <!-- ====================================================================
-             S4: 관리자 로그인 화면
-             ==================================================================== -->
-        <section id="screen-s4" class="view-screen hidden">
-          <div class="gb-dialog-box">
-            <h3>👨‍🏫 오박사 연구소 접속</h3>
-            <p style="font-size: 12px; margin-top: 8px;">관리자 전용 비전 코드를 입력해 주세요.</p>
-            <input type="password" id="s4-admin-code" class="game-input mt-14" placeholder="관리자 코드 (예: OAK-MASTER)">
-            
-            <button class="game-btn game-btn-gold game-btn-block mt-14" onclick="AudioFX.playClick(); App.handleAdminLogin()">
-              대시보드 접속 ▶
-            </button>
-            <button class="game-btn game-btn-block mt-10" onclick="AudioFX.playClick(); Router.navigate('s1')">
-              ◀ 뒤로가기
-            </button>
-          </div>
-        </section>
-
-        <!-- ====================================================================
-             S6: 팀 결성소 (Team Building)
-             ==================================================================== -->
-        <section id="screen-s6" class="view-screen hidden">
-          <div class="gb-dialog-box">
-            <h3>🚩 트레이너 팀 결성소</h3>
-            <p style="font-size: 12px; margin-top: 6px;">팀 이름과 팀원을 배정하여 팀을 창단하세요!</p>
-
-            <label style="font-size: 12px;" class="mt-10 display-block">1. 팀 이름</label>
-            <input type="text" id="s6-team-name" class="game-input mt-10" placeholder="예: 골드 트레이너 팀">
-
-            <label style="font-size: 12px;" class="mt-10 display-block">2. 팀원 선택 (미배정 목록)</label>
-            <div id="s6-member-checklist" class="gb-dialog-box mt-10" style="max-height: 160px; overflow-y: auto; background: #FFF;">
-              <div style="font-size: 12px;">명단 로딩 중...</div>
+        <!-- ============================================================
+             S3: MEMBER LOGIN
+             ============================================================ -->
+        <section id="screen-s3" class="view-screen">
+          <div class="screen-bg-town" style="padding: 10px 0;">
+            <div class="gbc-dialog">
+              <div class="speaker">오박사</div>
+              파트너 트레이너! 팀장에게 전달받은 코드를 보여주게!
             </div>
 
-            <button class="game-btn game-btn-gold game-btn-block mt-14" onclick="AudioFX.playClick(); App.handleCreateTeam()">
-              ✨ 트레이너 팀 결성!
-            </button>
-          </div>
-        </section>
-
-        <!-- ====================================================================
-             S7: 미션 풀숲 (Wild Mission Grass Field)
-             ==================================================================== -->
-        <section id="screen-s7" class="view-screen hidden">
-          <div class="gb-dialog-box dark">
-            <div class="dialog-text" id="s7-grass-dialog">
-              "🌿 야생의 풀숲이다! 포켓볼을 선택해 미션을 수집하자!"
+            <div class="gbc-menu">
+              <div class="gbc-menu-title">🎒 팀원 파트너 입장</div>
+              <div class="gbc-menu-body form-stack">
+                <div class="field-label">▶ 팀원 코드 입력</div>
+                <input type="text" id="s3-member-code" class="gbc-input" placeholder="예: SILVER-2026">
+                <div class="btn-stack">
+                  <button class="gbc-btn gbc-btn--blue" onclick="AudioFX.playClick(); App.handleMemberLogin()">
+                    ▶ 게스트 세션 접속!
+                  </button>
+                  <button class="gbc-btn gbc-btn--white" onclick="AudioFX.playClick(); Router.navigate('s1')">
+                    ◀ 뒤로가기
+                  </button>
+                </div>
+              </div>
             </div>
-            <div class="dialog-arrow">▼</div>
-          </div>
-
-          <div class="grass-field-container mt-10" id="s7-mission-grid">
-            <!-- JS로 풀숲 포켓볼 카드 로딩 -->
           </div>
         </section>
 
-        <!-- 미션 상세 & 획득 모달 -->
-        <div id="modal-mission-detail" class="modal-backdrop hidden">
-          <div class="gb-dialog-box" style="width: 100%; max-width: 360px;">
-            <h3 id="md-title">미션 제목</h3>
-            <div class="text-gold mt-10" id="md-points" style="font-size: 13px;">🎁 성공 시 +20 EXP</div>
-            <p class="mt-10" id="md-desc" style="font-size: 13px; background: #ffffff; padding: 8px; border: 2px solid #202b15; border-radius: 4px;">
-              미션 상세 내용
-            </p>
+        <!-- ============================================================
+             S4: ADMIN LOGIN
+             ============================================================ -->
+        <section id="screen-s4" class="view-screen">
+          <div class="screen-bg-lab" style="padding: 10px 0;">
+            <div class="gbc-dialog">
+              <div class="speaker">시스템</div>
+              오박사 연구소 보안 시스템입니다. 관리자 인증 코드를 입력하세요.
+            </div>
 
-            <!-- 룰렛 영역 -->
-            <div id="md-roulette-box" class="hidden">
-              <div class="arcade-roulette-wheel">
-                <div class="roulette-top-pointer"></div>
-                <div class="roulette-inner-wheel" id="roulette-wheel-el"></div>
+            <div class="gbc-menu">
+              <div class="gbc-menu-title">🔬 오박사 연구소 접속</div>
+              <div class="gbc-menu-body form-stack">
+                <div class="field-label">▶ 관리자 코드</div>
+                <input type="password" id="s4-admin-code" class="gbc-input" placeholder="관리자 전용 코드">
+                <div class="btn-stack">
+                  <button class="gbc-btn gbc-btn--red" onclick="AudioFX.playClick(); App.handleAdminLogin()">
+                    ▶ 대시보드 접속!
+                  </button>
+                  <button class="gbc-btn gbc-btn--white" onclick="AudioFX.playClick(); Router.navigate('s1')">
+                    ◀ 뒤로가기
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             S6: TEAM BUILDING
+             ============================================================ -->
+        <section id="screen-s6" class="view-screen">
+          <div class="screen-bg-gym" style="padding: 10px 0;">
+            <div class="gbc-dialog">
+              <div class="speaker">오박사</div>
+              훌륭해! 이제 동료 트레이너를 선택하여 팀을 결성하는거야!
+            </div>
+
+            <div class="gbc-menu">
+              <div class="gbc-menu-title">🚩 트레이너 팀 결성소</div>
+              <div class="gbc-menu-body form-stack">
+                <div class="field-label">▶ 팀 이름</div>
+                <input type="text" id="s6-team-name" class="gbc-input" placeholder="예: 골드 트레이너 팀">
+
+                <div class="field-label">▶ 팀원 선택 (미배정 목록)</div>
+                <div id="s6-member-checklist" style="max-height: 130px; overflow-y: auto; background: var(--gbc-lightest); border: 2px solid var(--gbc-dark); border-radius: 3px; padding: 6px;">
+                  <div style="font-size: 12px; color: var(--gbc-dark);" class="loading-dots">명단 로딩 중</div>
+                </div>
+
+                <div class="btn-stack">
+                  <button class="gbc-btn gbc-btn--gold" onclick="AudioFX.playClick(); App.handleCreateTeam()">
+                    ✨ 트레이너 팀 창단!
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             S7: WILD MISSION GRASS FIELD
+             ============================================================ -->
+        <section id="screen-s7" class="view-screen">
+          <div class="screen-bg-forest">
+            <div class="wild-area-header">
+              🌿 <span class="area-name">야생의 미션 풀숲</span> 🌿
+              <div style="font-size: 11px; margin-top: 2px;">포켓볼을 클릭해 미션을 획득하세요!</div>
+            </div>
+            <div class="grass-field" id="s7-mission-grid">
+              <!-- JS loaded -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Mission Detail Modal -->
+        <div id="modal-mission-detail" class="modal-overlay hidden">
+          <div class="modal-box">
+            <div style="text-align: center; margin-bottom: 8px;">
+              <div class="tile-ball" id="md-ball-icon" style="margin: 0 auto;"></div>
+            </div>
+            <div class="gbc-menu-title" id="md-title" style="justify-content: center;">미션 제목</div>
+            <div style="padding: 10px;">
+              <div id="md-points" style="font-family: var(--font-game); font-size: 13px; color: var(--gbc-dark); font-weight: bold; text-align: center;">🎁 성공 시 +20 EXP</div>
+              <div id="md-desc" style="font-family: var(--font-game); font-size: 13px; color: var(--gbc-darkest); background: var(--gbc-lightest); padding: 8px; border: 2px solid var(--gbc-dark); border-radius: 3px; margin-top: 8px; line-height: 1.5;">
+                미션 설명
+              </div>
+              <div class="btn-stack">
+                <button class="gbc-btn gbc-btn--red" id="btn-acquire-action" onclick="AudioFX.playClick(); App.executeAcquireMission()">
+                  🔴 포켓볼 던지기 (획득)!
+                </button>
+                <button class="gbc-btn gbc-btn--white" onclick="AudioFX.playClick(); App.closeMissionModal()">
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================================
+             S9: MY BAG (Inventory)
+             ============================================================ -->
+        <section id="screen-s9" class="view-screen">
+          <div class="screen-bg-gym" style="padding: 10px 0; min-height: 100%;">
+            <div class="gbc-menu" style="margin-bottom: 8px;">
+              <div class="gbc-menu-title">🎒 수집한 미션 가방</div>
+              <div class="gbc-menu-body">
+                <div id="s9-team-title" style="font-family: var(--font-game); font-size: 12px; color: var(--gbc-dark);">소속 팀: -</div>
+              </div>
+            </div>
+            <div id="s9-bag-list">
+              <!-- JS loaded -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             S10: LEADERBOARD
+             ============================================================ -->
+        <section id="screen-s10" class="view-screen">
+          <div class="screen-bg-gym" style="padding: 10px 0; min-height: 100%;">
+            <div class="gbc-menu" style="margin-bottom: 8px;">
+              <div class="gbc-menu-title" style="justify-content: center;">🏆 CHAMPION LEADERBOARD</div>
+              <div class="gbc-menu-body text-center">
+                <div id="s10-updated-at" style="font-size: 11px; color: var(--gbc-dark);">실시간 순위 갱신 중</div>
+              </div>
+            </div>
+            <div id="s10-ranking-list">
+              <!-- JS loaded -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             S11: ADMIN DASHBOARD
+             ============================================================ -->
+        <section id="screen-s11" class="view-screen">
+          <div class="screen-bg-lab" style="padding: 10px 0; min-height: 100%;">
+            <div class="gbc-menu" style="margin-bottom: 0;">
+              <div class="gbc-menu-title">🔬 오박사 연구소 대시보드</div>
+            </div>
+
+            <div class="admin-tab-bar">
+              <button class="admin-tab-btn active" onclick="AudioFX.playClick(); App.showAdminTab('pending')">⚖판정</button>
+              <button class="admin-tab-btn" onclick="AudioFX.playClick(); App.showAdminTab('missions')">🎯미션</button>
+              <button class="admin-tab-btn" onclick="AudioFX.playClick(); App.showAdminTab('members')">👥명단</button>
+              <button class="admin-tab-btn" onclick="AudioFX.playClick(); App.showAdminTab('config')">⚙설정</button>
+            </div>
+
+            <!-- Tab: Pending -->
+            <div id="admin-tab-pending" class="admin-panel">
+              <div style="font-family: var(--font-game); font-size: 13px; font-weight: bold; color: var(--gbc-darkest); margin-bottom: 8px;">⚖ 성공/실패 판정 대기열</div>
+              <div id="admin-pending-list"></div>
+            </div>
+
+            <!-- Tab: Missions -->
+            <div id="admin-tab-missions" class="admin-panel hidden">
+              <div style="font-family: var(--font-game); font-size: 13px; font-weight: bold; color: var(--gbc-darkest); margin-bottom: 8px;">🎯 미션 등록/수정</div>
+              <div class="form-stack">
+                <input type="text" id="adm-m-title" class="gbc-input" placeholder="미션 제목">
+                <textarea id="adm-m-desc" class="gbc-input" placeholder="상세 설명" rows="3" style="resize: vertical;"></textarea>
+                <input type="number" id="adm-m-points" class="gbc-input" placeholder="획득 EXP (예: 20)">
+                <button class="gbc-btn gbc-btn--gold mt-6" onclick="AudioFX.playClick(); App.handleAdminSaveMission()">미션 저장</button>
               </div>
             </div>
 
-            <div class="mt-14" style="display: flex; flex-direction: column; gap: 8px;">
-              <button class="game-btn game-btn-gold game-btn-block" id="btn-acquire-action" onclick="AudioFX.playClick(); App.executeAcquireMission()">
-                🔴 포켓볼 던지기 (획득)!
-              </button>
-              <button class="game-btn game-btn-block" onclick="AudioFX.playClick(); App.closeMissionModal()">닫기</button>
+            <!-- Tab: Members -->
+            <div id="admin-tab-members" class="admin-panel hidden">
+              <div style="font-family: var(--font-game); font-size: 13px; font-weight: bold; color: var(--gbc-darkest); margin-bottom: 8px;">👥 명단 일괄 추가</div>
+              <div class="form-stack">
+                <textarea id="adm-mem-text" class="gbc-input" rows="4" placeholder="학생 이름 (줄바꿈 구분)" style="resize: vertical;"></textarea>
+                <button class="gbc-btn gbc-btn--green mt-6" onclick="AudioFX.playClick(); App.handleAdminAddMembers()">명단 추가</button>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <!-- 포켓볼 오픈 연출 팝업 -->
-        <div id="gacha-anim-overlay" class="modal-backdrop hidden">
-          <div class="gacha-stage">
-            <div class="gacha-ball-giant" id="gacha-ball-el"></div>
-            <div class="gb-dialog-box dark" style="text-align: center; width: 280px;">
-              <p id="gacha-status-text" style="color:#f8d030; font-size: 14px;">포켓볼이 꿈틀거린다...</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="gacha-flash-screen" id="flash-screen-el"></div>
-
-        <!-- ====================================================================
-             S9: 내 가방 (Inventory Bag)
-             ==================================================================== -->
-        <section id="screen-s9" class="view-screen hidden">
-          <div class="gb-dialog-box">
-            <h3>🎒 트레이너 미션 가방</h3>
-            <div style="font-size: 12px;" id="s9-team-title" class="mt-10">소속 팀: -</div>
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 10px;" class="mt-10" id="s9-bag-list">
-            <!-- JS로 가방 아이템 수집 -->
-          </div>
-        </section>
-
-        <!-- ====================================================================
-             S10: 랭킹보드 (Gym Leaderboard)
-             ==================================================================== -->
-        <section id="screen-s10" class="view-screen hidden">
-          <div class="gb-dialog-box dark text-center" style="border-color: #f8d030;">
-            <h2 style="color: #f8d030; font-family: var(--font-pixel-en); font-size: 16px;">LEADERBOARD</h2>
-            <div style="font-size: 11px; color: #a3ab78;" id="s10-updated-at">실시간 체육관 순위 반영 중</div>
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 8px;" class="mt-10" id="s10-ranking-list">
-            <!-- JS로 랭킹 카드 반영 -->
-          </div>
-        </section>
-
-        <!-- ====================================================================
-             S11: 관리자 대시보드
-             ==================================================================== -->
-        <section id="screen-s11" class="view-screen hidden">
-          <div class="gb-dialog-box">
-            <h3>👨‍🏫 오박사 대시보드</h3>
-            <div style="display: flex; gap: 6px; flex-wrap: wrap;" class="mt-10">
-              <button class="game-btn" onclick="AudioFX.playClick(); App.showAdminTab('pending')">⚖ 판정대기</button>
-              <button class="game-btn" onclick="AudioFX.playClick(); App.showAdminTab('missions')">🎯 미션관리</button>
-              <button class="game-btn" onclick="AudioFX.playClick(); App.showAdminTab('members')">👥 명단관리</button>
-              <button class="game-btn" onclick="AudioFX.playClick(); App.showAdminTab('config')">⚙ 설정</button>
-            </div>
-          </div>
-
-          <!-- Tab 1: 판정 대기열 -->
-          <div id="admin-tab-pending" class="admin-tab mt-10">
-            <h4 style="font-size: 13px;">⚖ 미션 클리어 판정 대기열</h4>
-            <div id="admin-pending-list" style="display: flex; flex-direction: column; gap: 8px;" class="mt-10"></div>
-          </div>
-
-          <!-- Tab 2: 미션 관리 -->
-          <div id="admin-tab-missions" class="admin-tab mt-10 hidden">
-            <h4 style="font-size: 13px;">🎯 미션 등록 / 수정</h4>
-            <div class="gb-dialog-box mt-10">
-              <input type="text" id="adm-m-title" class="game-input mt-10" placeholder="미션 제목">
-              <textarea id="adm-m-desc" class="game-input mt-10" placeholder="상세 설명"></textarea>
-              <input type="number" id="adm-m-points" class="game-input mt-10" placeholder="획득 EXP (예: 20)">
-              <select id="adm-m-type" class="game-input mt-10">
-                <option value="gacha">뽑기 (Gacha)</option>
-                <option value="roulette">룰렛 (Roulette)</option>
-                <option value="first_come">선착순 (First Come)</option>
-              </select>
-              <label style="font-size: 11px;" class="mt-10 display-block">슬롯 내역 (줄바꿈 구분)</label>
-              <textarea id="adm-m-slots" class="game-input mt-10" rows="3" placeholder="슬롯1&#10;슬롯2"></textarea>
-              <button class="game-btn game-btn-gold game-btn-block mt-10" onclick="AudioFX.playClick(); App.handleAdminSaveMission()">미션 저장</button>
-            </div>
-          </div>
-
-          <!-- Tab 3: 명단 관리 -->
-          <div id="admin-tab-members" class="admin-tab mt-10 hidden">
-            <h4 style="font-size: 13px;">👥 학생 명단 추가 & 자동 배정</h4>
-            <div class="gb-dialog-box mt-10">
-              <label style="font-size: 11px;">학생 이름 붙여넣기 (줄바꿈 구분)</label>
-              <textarea id="adm-mem-text" class="game-input mt-10" rows="4" placeholder="김철수&#10;이영희"></textarea>
-              <button class="game-btn game-btn-gold game-btn-block mt-10" onclick="AudioFX.playClick(); App.handleAdminAddMembers()">명단 일괄 추가</button>
-              <button class="game-btn game-btn-block mt-10" onclick="AudioFX.playClick(); App.handleAdminRandomAssign()">🎲 미배정자 자동 배치</button>
-            </div>
-          </div>
-
-          <!-- Tab 4: 행사 설정 -->
-          <div id="admin-tab-config" class="admin-tab mt-10 hidden">
-            <h4 style="font-size: 13px;">⚙ 행사 단계 스위치 & 보안</h4>
-            <div class="gb-dialog-box mt-10" style="display: flex; flex-direction: column; gap: 8px;">
-              <button class="game-btn game-btn-gold" onclick="AudioFX.playClick(); App.handleAdminSetPhase('building')">단계 1: 팀 빌딩 (building)</button>
-              <button class="game-btn game-btn-green" onclick="AudioFX.playClick(); App.handleAdminSetPhase('mission')">단계 2: 미션 진행 (mission)</button>
-              <button class="game-btn game-btn-red" onclick="AudioFX.playClick(); App.handleAdminSetPhase('closed')">단계 3: 행사 종료 (closed)</button>
-              <hr style="border: 1px dashed #202b15;">
-              <button class="game-btn game-btn-red game-btn-block" onclick="AudioFX.playClick(); App.handleAdminPurgeData()">⚠ 행사 종료 후 개인정보 파기</button>
+            <!-- Tab: Config -->
+            <div id="admin-tab-config" class="admin-panel hidden">
+              <div style="font-family: var(--font-game); font-size: 13px; font-weight: bold; color: var(--gbc-darkest); margin-bottom: 8px;">⚙ 행사 제어</div>
+              <div class="btn-stack">
+                <button class="gbc-btn gbc-btn--gold" onclick="AudioFX.playClick(); App.handleAdminSetPhase('building')">단계 1: 팀 빌딩</button>
+                <button class="gbc-btn gbc-btn--green" onclick="AudioFX.playClick(); App.handleAdminSetPhase('mission')">단계 2: 미션 진행</button>
+                <button class="gbc-btn gbc-btn--red" onclick="AudioFX.playClick(); App.handleAdminSetPhase('closed')">단계 3: 행사 종료</button>
+              </div>
             </div>
           </div>
         </section>
 
-      </main>
+      </div><!-- /game-viewport -->
 
-      <!-- Bottom Game Navbar -->
-      <nav class="gb-navbar" id="app-navbar">
-        <button class="nav-item active" onclick="AudioFX.playClick(); Router.navigate('s7')">
+      <!-- Bottom Navigation -->
+      <div class="gbc-nav" id="main-nav">
+        <button class="nav-item active" data-nav="s7" onclick="AudioFX.playClick(); Router.navigate('s7')">
           <span class="nav-icon">🌿</span>
-          <span>풀숲미션</span>
+          <span>풀숲</span>
         </button>
-        <button class="nav-item" onclick="AudioFX.playClick(); Router.navigate('s9')">
+        <button class="nav-item" data-nav="s9" onclick="AudioFX.playClick(); Router.navigate('s9')">
           <span class="nav-icon">🎒</span>
           <span>가방</span>
         </button>
-        <button class="nav-item" onclick="AudioFX.playClick(); Router.navigate('s10')">
+        <button class="nav-item" data-nav="s10" onclick="AudioFX.playClick(); Router.navigate('s10')">
           <span class="nav-icon">🏆</span>
-          <span>리더보드</span>
+          <span>랭킹</span>
         </button>
-        <button class="nav-item" onclick="AudioFX.playClick(); Router.navigate('s6')">
+        <button class="nav-item" data-nav="s6" onclick="AudioFX.playClick(); Router.navigate('s6')">
           <span class="nav-icon">🚩</span>
           <span>팀결성</span>
         </button>
-      </nav>
+      </div>
 
-    </div><!-- End CRT Viewport -->
+    </div><!-- /gbc-screen -->
+  </div><!-- /gbc-bezel -->
 
-  </div><!-- End Bezel -->
-
-  <!-- Console Hardware Controls (D-Pad & A/B Buttons) -->
-  <div class="console-controls-area">
+  <!-- Decorative GBC Controls -->
+  <div class="gbc-controls">
     <div class="dpad">
-      <div class="dpad-btn dpad-up" onclick="AudioFX.playClick()"></div>
-      <div class="dpad-btn dpad-down" onclick="AudioFX.playClick()"></div>
-      <div class="dpad-btn dpad-left" onclick="AudioFX.playClick()"></div>
-      <div class="dpad-btn dpad-right" onclick="AudioFX.playClick()"></div>
+      <div class="dpad-h"></div>
+      <div class="dpad-v"></div>
       <div class="dpad-center"></div>
     </div>
-    <div class="action-buttons">
-      <div class="ab-btn" onclick="AudioFX.playClick()">B</div>
-      <div class="ab-btn" onclick="AudioFX.playClick(); AudioFX.playFanfare()">A</div>
+    <div class="ab-buttons">
+      <div class="btn-circle btn-b">B</div>
+      <div class="btn-circle btn-a">A</div>
     </div>
   </div>
 
-</div><!-- End Outer Shell -->
+</div><!-- /gbc-shell -->
 
-<?!= include('js'); ?>
+<script>
+/* ==========================================================================
+   🎮 POCKET FIELD ADVENTURE — CLIENT ENGINE
+   Web Audio Chiptune SFX + SPA Router + GBC Screen Transitions
+   ========================================================================== */
+
+/* ===== WEB AUDIO CHIPTUNE ENGINE ===== */
+const AudioFX = {
+  ctx: null,
+  muted: false,
+
+  init() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
+    } catch (e) {}
+  },
+
+  toggleSound() {
+    this.muted = !this.muted;
+    const btn = document.querySelector('.sound-toggle');
+    if (btn) btn.textContent = this.muted ? '✕' : '♪';
+  },
+
+  playTone(freq, type, duration, delay = 0) {
+    if (this.muted || !this.ctx) return;
+    setTimeout(() => {
+      try {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + duration);
+      } catch (e) {}
+    }, delay * 1000);
+  },
+
+  playClick() {
+    if (!this.ctx) this.init();
+    this.playTone(800, 'square', 0.04);
+  },
+
+  playSuccess() {
+    if (!this.ctx) this.init();
+    this.playTone(523, 'square', 0.1, 0);
+    this.playTone(659, 'square', 0.1, 0.1);
+    this.playTone(783, 'square', 0.15, 0.2);
+    this.playTone(1046, 'square', 0.2, 0.3);
+  },
+
+  playNavigate() {
+    if (!this.ctx) this.init();
+    this.playTone(440, 'square', 0.06, 0);
+    this.playTone(660, 'square', 0.06, 0.06);
+  }
+};
+
+/* ===== GAS API CONFIG ===== */
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzOqoIwIamnXR7YUgh85w_478lybLsmdEd58_DJVGFDcnmhzsSQQvGXOoQTD_DTZjtGAg/exec";
+
+const State = {
+  token: localStorage.getItem('POCKET_TOKEN') || '',
+  role: localStorage.getItem('POCKET_ROLE') || 'guest',
+  memberId: localStorage.getItem('POCKET_MEMBER_ID') || '',
+  memberName: localStorage.getItem('POCKET_MEMBER_NAME') || '',
+  teamId: localStorage.getItem('POCKET_TEAM_ID') || '',
+  webAppUrl: GAS_WEB_APP_URL,
+  currentMission: null,
+  currentScreen: 's1'
+};
+
+/* ===== API BRIDGE ===== */
+function apiCall(funcName, ...args) {
+  return new Promise(async (resolve, reject) => {
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => resolve(res))
+        .withFailureHandler(err => reject(err))
+        [funcName](...args);
+      return;
+    }
+
+    const targetGasUrl = State.webAppUrl || GAS_WEB_APP_URL;
+    if (targetGasUrl) {
+      try {
+        const payloadObj = args.length > 1 ? args[1] : (args[0] || {});
+        const tokenVal = typeof args[0] === 'string' ? args[0] : State.token;
+        const res = await fetch(targetGasUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: funcName,
+            token: tokenVal,
+            payload: payloadObj
+          })
+        });
+        const json = await res.json();
+        resolve(json);
+        return;
+      } catch (err) {
+        console.error('[REST Error]', err);
+      }
+    }
+
+    // Local Preview Mock
+    setTimeout(() => {
+      if (funcName === 'login') {
+        resolve({ ok: true, data: { token: 'MOCK_TOKEN_123', role: args[0].role, memberName: '테스트 트레이너' } });
+      } else if (funcName === 'getMissions') {
+        resolve({
+          ok: true,
+          data: {
+            missions: [
+              { mission_id: 'Q001', title: '드레스코드 미션', description: '레트로 교복 단체사진 인증! 친구들과 함께 멋진 포즈를 취해보자!', points: 20, acquire_type: 'gacha', ball_type: 'normal', status: 'open' },
+              { mission_id: 'Q002', title: '야생의 댄스 미션', description: '중앙 광장에서 단체 댄스를 추고 인증샷을 찍어라!', points: 30, acquire_type: 'roulette', ball_type: 'great', status: 'open' },
+              { mission_id: 'Q003', title: '보물찾기 미션', description: '숨겨진 QR코드를 찾아 스캔하면 특별한 보상이!', points: 50, acquire_type: 'gacha', ball_type: 'ultra', status: 'open' },
+              { mission_id: 'Q004', title: '팀 구호 외치기', description: '팀만의 독창적인 구호를 만들고 영상으로 인증!', points: 15, acquire_type: 'gacha', ball_type: 'normal', status: 'open' }
+            ]
+          }
+        });
+      } else if (funcName === 'getRanking') {
+        resolve({
+          ok: true,
+          data: {
+            ranking: [
+              { rank: 1, team_name: '피카츄 탐험대', emblem: 'ball_normal', total_points: 120, cleared_count: 5, members: ['김피카', '이파이리'] },
+              { rank: 2, team_name: '꼬북이 특공대', emblem: 'ball_great', total_points: 90, cleared_count: 3, members: ['박꼬북', '최잠만보'] },
+              { rank: 3, team_name: '이상해씨 모험단', emblem: 'ball_normal', total_points: 75, cleared_count: 2, members: ['이상해', '김씨앗'] }
+            ],
+            updatedAt: new Date().toISOString()
+          }
+        });
+      } else if (funcName === 'getMyBag') {
+        resolve({
+          ok: true,
+          data: {
+            teamName: '피카츄 탐험대',
+            items: [
+              { log_id: 'L001', title: '드레스코드 미션', points: 20, slot_content: '교복 단체사진', result: 'success' },
+              { log_id: 'L002', title: '야생의 댄스 미션', points: 30, slot_content: '광장 댄스', result: 'pending' }
+            ]
+          }
+        });
+      } else {
+        resolve({ ok: true, data: { message: '실행 완료' } });
+      }
+    }, 300);
+  });
+}
+
+/* ===== SCREEN TRANSITION ROUTER ===== */
+const Router = {
+  navigate(screenId, skipTransition = false) {
+    if (State.currentScreen === screenId) return;
+
+    const transEl = document.getElementById('screen-transition');
+
+    const doSwitch = () => {
+      // Hide all screens
+      document.querySelectorAll('.view-screen').forEach(el => el.classList.remove('active'));
+      // Show target
+      const target = document.getElementById(`screen-${screenId}`);
+      if (target) target.classList.add('active');
+      // Scroll to top
+      document.getElementById('game-viewport').scrollTop = 0;
+
+      // Update nav
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.nav === screenId);
+      });
+
+      // Show/hide nav bar based on screen
+      const navEl = document.getElementById('main-nav');
+      const loggedInScreens = ['s7', 's9', 's10', 's6'];
+      navEl.style.display = loggedInScreens.includes(screenId) ? 'flex' : 'none';
+
+      State.currentScreen = screenId;
+
+      // Trigger data load
+      if (screenId === 's2') App.loadMemberList();
+      if (screenId === 's6') App.loadUnassignedMembers();
+      if (screenId === 's7') App.loadMissions();
+      if (screenId === 's9') App.loadMyBag();
+      if (screenId === 's10') App.loadRanking();
+      if (screenId === 's11') App.loadAdminDashboard();
+
+      AudioFX.playNavigate();
+    };
+
+    if (skipTransition) {
+      doSwitch();
+      return;
+    }
+
+    // Play GBC-style screen wipe transition
+    transEl.classList.remove('active', 'wipe');
+    void transEl.offsetWidth; // Force reflow
+    transEl.classList.add('active');
+
+    setTimeout(doSwitch, 250);
+    setTimeout(() => transEl.classList.remove('active'), 600);
+  }
+};
+
+/* ===== APP LOGIC ===== */
+const App = {
+  init() {
+    AudioFX.init();
+    // First click to unlock audio context
+    document.addEventListener('click', () => {
+      if (AudioFX.ctx && AudioFX.ctx.state === 'suspended') {
+        AudioFX.ctx.resume();
+      }
+    }, { once: true });
+
+    if (State.token) {
+      if (State.role === 'admin') Router.navigate('s11', true);
+      else Router.navigate('s7', true);
+    } else {
+      Router.navigate('s1', true);
+    }
+  },
+
+  async loadMemberList() {
+    try {
+      const res = await apiCall('getMemberList', State.token);
+      if (res.ok && res.data) {
+        const select = document.getElementById('s2-member-select');
+        select.innerHTML = '<option value="">-- 본인 이름을 선택하세요 --</option>';
+        (res.data.all || []).forEach(m => {
+          select.innerHTML += `<option value="${m.member_id}">${m.name} (${m.class_info || '학생'})</option>`;
+        });
+      }
+    } catch (e) {}
+  },
+
+  async handleLeaderLogin() {
+    const memberId = document.getElementById('s2-member-select').value;
+    const leaderCode = document.getElementById('s2-leader-code').value.trim();
+    const password = document.getElementById('s2-password').value;
+
+    if (!memberId || !leaderCode) return alert('이름과 팀장 코드를 입력하세요!');
+
+    const res = await apiCall('login', { role: 'leader', memberId, leaderCode, password });
+    if (res.ok) {
+      if (res.requireSetPassword) {
+        document.getElementById('modal-set-pw').classList.remove('hidden');
+      } else {
+        this.saveSession(res.data);
+        AudioFX.playSuccess();
+        Router.navigate('s7');
+      }
+    } else alert(res.error ? res.error.message : '로그인 실패');
+  },
+
+  async handleSetInitialPassword() {
+    const pw1 = document.getElementById('modal-pw-input').value;
+    const pw2 = document.getElementById('modal-pw-confirm').value;
+    const memberId = document.getElementById('s2-member-select').value;
+    const leaderCode = document.getElementById('s2-leader-code').value.trim();
+
+    if (!pw1 || pw1 !== pw2) return alert('비밀번호가 일치하지 않습니다.');
+
+    const res = await apiCall('setInitialPassword', { memberId, leaderCode, password: pw1 });
+    if (res.ok) {
+      document.getElementById('modal-set-pw').classList.add('hidden');
+      this.saveSession(res.data);
+      AudioFX.playSuccess();
+      Router.navigate('s7');
+    } else alert(res.error ? res.error.message : '비밀번호 설정 실패');
+  },
+
+  async handleMemberLogin() {
+    const memberCode = document.getElementById('s3-member-code').value.trim();
+    if (!memberCode) return alert('팀원 코드를 입력하세요.');
+
+    const res = await apiCall('login', { role: 'member', memberCode });
+    if (res.ok) {
+      this.saveSession(res.data);
+      AudioFX.playSuccess();
+      Router.navigate('s7');
+    } else alert(res.error ? res.error.message : '팀원 코드 오류');
+  },
+
+  async handleAdminLogin() {
+    const adminCode = document.getElementById('s4-admin-code').value.trim();
+    if (!adminCode) return alert('관리자 코드를 입력하세요.');
+
+    const res = await apiCall('login', { role: 'admin', adminCode });
+    if (res.ok) {
+      this.saveSession(res.data);
+      AudioFX.playSuccess();
+      Router.navigate('s11');
+    } else alert(res.error ? res.error.message : '관리자 코드 오류');
+  },
+
+  saveSession(data) {
+    State.token = data.token;
+    State.role = data.role;
+    localStorage.setItem('POCKET_TOKEN', data.token);
+    localStorage.setItem('POCKET_ROLE', data.role);
+    if (data.memberName) localStorage.setItem('POCKET_MEMBER_NAME', data.memberName);
+    const badge = document.getElementById('hud-role-tag');
+    if (badge) {
+      const labels = { admin: 'ADMIN', leader: 'LEADER', member: 'MEMBER' };
+      badge.textContent = labels[data.role] || 'TRAINER';
+    }
+  },
+
+  async loadUnassignedMembers() {
+    const checklist = document.getElementById('s6-member-checklist');
+    checklist.innerHTML = '<div class="loading-dots" style="font-size:12px; color:var(--gbc-dark);">명단 로딩 중</div>';
+    try {
+      const res = await apiCall('getMemberList', State.token);
+      if (res.ok && res.data) {
+        const list = res.data.unassigned || [];
+        if (list.length === 0) {
+          checklist.innerHTML = '<div style="font-size:12px; color:var(--gbc-dark);">모든 학생이 팀 배정 완료되었습니다.</div>';
+          return;
+        }
+        checklist.innerHTML = '';
+        list.forEach(m => {
+          checklist.innerHTML += `
+            <label style="display:flex; gap:8px; font-size:13px; margin-bottom:6px; align-items:center; font-family:var(--font-game); color:var(--gbc-darkest); cursor:pointer;">
+              <input type="checkbox" name="team-member" value="${m.member_id}">
+              <span>${m.name} (${m.class_info || '학생'})</span>
+            </label>
+          `;
+        });
+      }
+    } catch (e) {}
+  },
+
+  async handleCreateTeam() {
+    const teamName = document.getElementById('s6-team-name').value.trim();
+    const checkedBoxes = document.querySelectorAll('input[name="team-member"]:checked');
+    const memberIds = Array.from(checkedBoxes).map(cb => cb.value);
+
+    if (!teamName) return alert('팀 이름을 입력하세요.');
+
+    const res = await apiCall('createTeam', State.token, { teamName, emblem: 'ball_normal', memberIds });
+    if (res.ok) {
+      AudioFX.playSuccess();
+      alert(res.data.message);
+      Router.navigate('s7');
+    } else alert(res.error ? res.error.message : '팀 결성 실패');
+  },
+
+  async loadMissions() {
+    const grid = document.getElementById('s7-mission-grid');
+    grid.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:24px; color:var(--gbc-lightest); font-family:var(--font-game);"><span class="loading-dots">🌿 풀숲 미션 탐색 중</span></div>';
+    try {
+      const res = await apiCall('getMissions', State.token);
+      if (res.ok && res.data) {
+        const missions = res.data.missions || [];
+        grid.innerHTML = '';
+        if (missions.length === 0) {
+          grid.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:24px; color:var(--gbc-lightest); font-family:var(--font-game);">아직 등록된 미션이 없습니다.</div>';
+          return;
+        }
+        missions.forEach((m, idx) => {
+          const isAcquired = !!m.my_acquired;
+          const ballClass = m.ball_type === 'great' ? 'great' : (m.ball_type === 'ultra' ? 'ultra' : '');
+          grid.innerHTML += `
+            <div class="wild-tile ${isAcquired ? 'acquired' : ''}" onclick="AudioFX.playClick(); App.openMissionModal('${m.mission_id}')" style="animation-delay: ${idx * 0.1}s;">
+              ${isAcquired ? '<div class="tile-tag-get">GET!</div>' : ''}
+              <div class="tile-ball ${ballClass}"></div>
+              <div class="tile-title">${m.title}</div>
+              <div class="tile-exp">+${m.points} EXP</div>
+            </div>
+          `;
+        });
+        window._missionsData = missions;
+      }
+    } catch (e) {}
+  },
+
+  openMissionModal(missionId) {
+    const missions = window._missionsData || [];
+    const target = missions.find(m => m.mission_id === missionId);
+    if (!target) return;
+    State.currentMission = target;
+
+    document.getElementById('md-title').textContent = target.title;
+    document.getElementById('md-points').textContent = `🎁 성공 시 +${target.points} EXP`;
+    document.getElementById('md-desc').textContent = target.description;
+
+    // Encounter flash effect
+    const flash = document.getElementById('encounter-flash');
+    flash.classList.remove('active');
+    void flash.offsetWidth;
+    flash.classList.add('active');
+    setTimeout(() => flash.classList.remove('active'), 800);
+
+    document.getElementById('modal-mission-detail').classList.remove('hidden');
+  },
+
+  closeMissionModal() {
+    document.getElementById('modal-mission-detail').classList.add('hidden');
+  },
+
+  async executeAcquireMission() {
+    if (!State.currentMission) return;
+    this.closeMissionModal();
+    const res = await apiCall('acquireMission', State.token, { missionId: State.currentMission.mission_id });
+    if (res.ok) {
+      AudioFX.playSuccess();
+      alert(`🎉 포켓볼 획득 성공!\n\n획득 미션: [${res.data.slotContent}]`);
+      App.loadMissions();
+    } else alert(res.error ? res.error.message : '획득 실패');
+  },
+
+  async loadMyBag() {
+    const list = document.getElementById('s9-bag-list');
+    list.innerHTML = '<div class="bag-item"><span class="loading-dots" style="font-family:var(--font-game); color:var(--gbc-dark);">가방 확인 중</span></div>';
+    try {
+      const res = await apiCall('getMyBag', State.token);
+      if (res.ok && res.data) {
+        document.getElementById('s9-team-title').textContent = `소속 팀: ${res.data.teamName || '미배정'}`;
+        const items = res.data.items || [];
+        if (items.length === 0) {
+          list.innerHTML = '<div class="bag-item" style="justify-content:center;">획득한 미션이 없습니다. 풀숲에서 포켓볼을 던져보세요!</div>';
+          return;
+        }
+        list.innerHTML = '';
+        items.forEach(item => {
+          const statusClass = item.result === 'success' ? 'status-clear' : (item.result === 'fail' ? 'status-fail' : 'status-pending');
+          const statusText = item.result === 'success' ? 'CLEAR' : (item.result === 'fail' ? 'FAIL' : 'WAIT');
+          list.innerHTML += `
+            <div class="bag-item">
+              <div class="bag-item-ball"></div>
+              <div class="bag-item-info">
+                <div class="bag-item-title">${item.title}</div>
+                <div class="bag-item-detail">${item.slot_content} · +${item.points}EXP</div>
+              </div>
+              <div class="bag-item-status ${statusClass}">${statusText}</div>
+            </div>
+          `;
+        });
+      }
+    } catch (e) {}
+  },
+
+  async loadRanking() {
+    const list = document.getElementById('s10-ranking-list');
+    list.innerHTML = '<div class="rank-entry" style="justify-content:center;"><span class="loading-dots" style="font-family:var(--font-game); color:var(--gbc-dark);">순위 로딩 중</span></div>';
+    try {
+      const res = await apiCall('getRanking', State.token);
+      if (res.ok && res.data) {
+        if (res.data.hidden) {
+          list.innerHTML = `<div class="rank-entry" style="justify-content:center; font-family:var(--font-game);">${res.data.message}</div>`;
+          return;
+        }
+        const ranking = res.data.ranking || [];
+        if (res.data.updatedAt) {
+          document.getElementById('s10-updated-at').textContent = `최종 갱신: ${new Date(res.data.updatedAt).toLocaleTimeString('ko-KR')}`;
+        }
+        list.innerHTML = '';
+        ranking.forEach(t => {
+          list.innerHTML += `
+            <div class="rank-entry ${t.rank === 1 ? 'champion' : ''}">
+              <div class="rank-num">${t.rank}</div>
+              <div class="rank-info">
+                <div class="rank-team-name">${t.team_name}</div>
+                <div class="rank-members">${(t.members || []).join(', ')}</div>
+              </div>
+              <div class="rank-points">${t.total_points}P</div>
+            </div>
+          `;
+        });
+      }
+    } catch (e) {}
+  },
+
+  showAdminTab(tabName) {
+    document.querySelectorAll('.admin-panel').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`admin-tab-${tabName}`).classList.remove('hidden');
+    // Find the clicked button and activate it
+    event.target.classList.add('active');
+  },
+
+  async loadAdminDashboard() {
+    try {
+      const res = await apiCall('adminGetDashboard', State.token);
+      if (res.ok && res.data) {
+        const pending = res.data.pendingLogs || [];
+        const list = document.getElementById('admin-pending-list');
+        if (pending.length === 0) {
+          list.innerHTML = '<div style="font-size:12px; color:var(--gbc-dark); font-family:var(--font-game); text-align:center; padding:10px;">대기 중인 판정이 없습니다.</div>';
+          return;
+        }
+        list.innerHTML = '';
+        pending.forEach(item => {
+          list.innerHTML += `
+            <div class="admin-pending-card">
+              <div class="admin-pending-title">${item.team_name} — ${item.mission_title}</div>
+              <div class="admin-pending-detail">내용: ${item.slot_content} (+${item.points}P)</div>
+              <div class="admin-btn-row">
+                <button class="admin-btn-sm admin-btn-sm--approve" onclick="AudioFX.playClick(); App.handleAdminJudge('${item.log_id}', 'success')">⭕ 승인</button>
+                <button class="admin-btn-sm admin-btn-sm--reject" onclick="AudioFX.playClick(); App.handleAdminJudge('${item.log_id}', 'fail')">❌ 실패</button>
+              </div>
+            </div>
+          `;
+        });
+      }
+    } catch (e) {}
+  },
+
+  async handleAdminJudge(logId, result) {
+    const res = await apiCall('adminJudge', State.token, { logId, result });
+    if (res.ok) {
+      AudioFX.playSuccess();
+      alert(res.data.message);
+      this.loadAdminDashboard();
+    }
+  },
+
+  async handleAdminSaveMission() {
+    // Placeholder for mission save
+    alert('미션 저장 기능 (구현 예정)');
+  },
+
+  async handleAdminAddMembers() {
+    const raw = document.getElementById('adm-mem-text').value.trim();
+    if (!raw) return;
+    const names = raw.split('\n').map(n => ({ name: n.trim() })).filter(n => n.name);
+    const res = await apiCall('adminUpsertMembers', State.token, names);
+    if (res.ok) {
+      AudioFX.playSuccess();
+      alert(res.data.message);
+      document.getElementById('adm-mem-text').value = '';
+    }
+  },
+
+  async handleAdminSetPhase(phase) {
+    const res = await apiCall('adminUpdateConfig', State.token, { event_phase: phase });
+    if (res.ok) alert(`행사 단계가 [${phase}]로 전환되었습니다!`);
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => App.init());
+</script>
 </body>
 </html>
