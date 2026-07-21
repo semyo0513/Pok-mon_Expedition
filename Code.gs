@@ -84,6 +84,20 @@ function ensureDatabase() {
     ]);
   }
 
+  // Members 시트에 초기 샘플 명단이 없으면 삽입
+  var membersSheet = ss.getSheetByName('Members');
+  if (membersSheet && membersSheet.getLastRow() <= 1) {
+    var now = new Date().toISOString();
+    membersSheet.appendRow(['M001', '김피카', '1학년 1반', 'member', '', '', false, now]);
+    membersSheet.appendRow(['M002', '이파이리', '1학년 1반', 'member', '', '', false, now]);
+    membersSheet.appendRow(['M003', '박꼬북', '1학년 1반', 'member', '', '', false, now]);
+    membersSheet.appendRow(['M004', '최이상해', '1학년 1반', 'member', '', '', false, now]);
+    membersSheet.appendRow(['M005', '정버터플', '1학년 2반', 'member', '', '', false, now]);
+    membersSheet.appendRow(['M006', '강잠만보', '1학년 2반', 'member', '', '', false, now]);
+    membersSheet.appendRow(['M007', '윤뮤츠', '1학년 2반', 'member', '', '', false, now]);
+    membersSheet.appendRow(['M008', '임이브이', '1학년 2반', 'member', '', '', false, now]);
+  }
+
   // 기본 시트(Sheet1) 정리 — 빈 기본시트가 남아있으면 삭제 시도
   if (created) {
     try {
@@ -353,8 +367,7 @@ function setInitialPassword(payload) {
 
 function getMemberList(token) {
   try {
-    var auth = verifyToken(token);
-    if (!auth.valid) return { ok: false, error: { message: auth.message } };
+    // 팀장 로그인 화면 드롭다운에서 본인 이름을 고를 수 있도록 토큰 없이도 명단 조회 허용
     var members = getSheetObjects('Members');
     var unassigned = [], allMembers = [];
     for (var i = 0; i < members.length; i++) {
