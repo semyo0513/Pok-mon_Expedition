@@ -1,11 +1,68 @@
 <script>
 /* ==========================================================================
-   🎮 POCKET FIELD ADVENTURE - FRONTEND CLIENT LOGIC (js.html)
+   🎮 POCKET FIELD ADVENTURE - FRONTEND CONTROLLER & AUDIO FX (js.html)
+   Web Audio API Chiptune SFX Engine & GBC Game Router
    ========================================================================== */
 
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzOqoIwIamnXR7YUgh85w_478lybLsmdEd58_DJVGFDcnmhzsSQQvGXOoQTD_DTZjtGAg/exec";
 
-// Global Application State
+// Web Audio API Retro 8-bit Sound Generator
+const AudioFX = {
+  ctx: null,
+  muted: false,
+
+  init() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
+    } catch (e) {}
+  },
+
+  toggleSound() {
+    this.muted = !this.muted;
+    alert(this.muted ? '🔇 사운드 음소거 모드' : '🔊 8-bit 레트로 사운드 켜짐');
+  },
+
+  playTone(freq, type, duration, delay = 0) {
+    if (this.muted) return;
+    if (!this.ctx) this.init();
+    if (!this.ctx) return;
+
+    setTimeout(() => {
+      try {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + duration);
+      } catch (e) {}
+    }, delay * 1000);
+  },
+
+  playClick() {
+    this.playTone(600, 'square', 0.05);
+  },
+
+  playSuccess() {
+    this.playTone(523, 'square', 0.08, 0);   // C5
+    this.playTone(659, 'square', 0.08, 0.08); // E5
+    this.playTone(783, 'square', 0.12, 0.16); // G5
+  },
+
+  playFanfare() {
+    this.playTone(523, 'triangle', 0.1, 0);
+    this.playTone(659, 'triangle', 0.1, 0.1);
+    this.playTone(783, 'triangle', 0.1, 0.2);
+    this.playTone(1046, 'square', 0.25, 0.3);
+  }
+};
+
+// Global State
 const State = {
   token: localStorage.getItem('POCKET_TOKEN') || '',
   role: localStorage.getItem('POCKET_ROLE') || 'guest',
@@ -20,7 +77,6 @@ const State = {
 // Unified API Bridge
 function apiCall(funcName, ...args) {
   return new Promise(async (resolve, reject) => {
-    // Mode 1: Embedded inside GAS Web App (google.script.run)
     if (typeof google !== 'undefined' && google.script && google.script.run) {
       google.script.run
         .withSuccessHandler(res => resolve(res))
@@ -29,7 +85,6 @@ function apiCall(funcName, ...args) {
       return;
     }
 
-    // Mode 2: GitHub Pages / Remote REST API Call
     const targetGasUrl = State.webAppUrl || GAS_WEB_APP_URL;
     if (targetGasUrl) {
       try {
@@ -52,8 +107,7 @@ function apiCall(funcName, ...args) {
       }
     }
 
-    // Mode 3: Local Standalone Preview Mock
-    console.warn(`[Local Standalone Preview Mock] ${funcName}`, args);
+    // Local Preview Mock Fallback
     setTimeout(() => {
       if (funcName === 'login') {
         resolve({ ok: true, data: { token: 'MOCK_TOKEN_123', role: args[0].role, memberName: '테스트 트레이너' } });
@@ -62,8 +116,8 @@ function apiCall(funcName, ...args) {
           ok: true,
           data: {
             missions: [
-              { mission_id: 'Q001', title: '드레스코드 미션 (뽑기)', description: '레트로 교복 단체사진', points: 20, acquire_type: 'gacha', ball_type: 'normal', status: 'open', slots: ['슬롯1', '슬롯2'] },
-              { mission_id: 'Q002', title: '야생의 룰렛 미션', description: '중앙 광장 댄스 인증', points: 30, acquire_type: 'roulette', ball_type: 'great', status: 'open', slots: ['장소A', '장소B'] }
+              { mission_id: 'Q001', title: '드레스코드 미션 (뽑기)', description: '레트로 교복 단체사진 인증', points: 20, acquire_type: 'gacha', ball_type: 'normal', status: 'open', slots: ['슬롯1', '슬롯2'] },
+              { mission_id: 'Q002', title: '야생의 룰렛 미션', description: '중앙 광장 댄스 인증샷', points: 30, acquire_type: 'roulette', ball_type: 'great', status: 'open', slots: ['장소A', '장소B'] }
             ]
           }
         });
@@ -78,9 +132,9 @@ function apiCall(funcName, ...args) {
           }
         });
       } else {
-        resolve({ ok: true, data: { message: '로컬 테스트 실행 완료' } });
+        resolve({ ok: true, data: { message: '실행 완료' } });
       }
-    }, 400);
+    }, 300);
   });
 }
 
@@ -108,6 +162,7 @@ const Router = {
 
 const App = {
   init() {
+    AudioFX.init();
     this.updateHeaderUI();
     if (State.token) {
       if (State.role === 'admin') Router.navigate('s11');
@@ -118,11 +173,11 @@ const App = {
   },
 
   updateHeaderUI() {
-    const badge = document.getElementById('header-user-badge');
-    if (State.role === 'admin') badge.textContent = '오박사(관리자)';
-    else if (State.role === 'leader') badge.textContent = `팀장:${State.memberName}`;
-    else if (State.role === 'member') badge.textContent = '파트너';
-    else badge.textContent = 'PRESS START';
+    const levelTag = document.getElementById('hud-level-tag');
+    if (State.role === 'admin') levelTag.textContent = 'OAK.PROF';
+    else if (State.role === 'leader') levelTag.textContent = `LEADER:${State.memberName}`;
+    else if (State.role === 'member') levelTag.textContent = 'MEMBER';
+    else levelTag.textContent = 'START';
   },
 
   setSession(data) {
@@ -139,14 +194,6 @@ const App = {
     localStorage.setItem('POCKET_TEAM_ID', State.teamId);
 
     this.updateHeaderUI();
-  },
-
-  logout() {
-    localStorage.clear();
-    State.token = '';
-    State.role = 'guest';
-    this.updateHeaderUI();
-    Router.navigate('s1');
   },
 
   async loadMemberList() {
@@ -167,7 +214,7 @@ const App = {
     const leaderCode = document.getElementById('s2-leader-code').value.trim();
     const password = document.getElementById('s2-password').value;
 
-    if (!memberId || !leaderCode) return alert('이름과 팀장 코드를 모두 입력하세요!');
+    if (!memberId || !leaderCode) return alert('이름과 팀장 코드를 입력해 주세요!');
 
     const res = await apiCall('login', { role: 'leader', memberId, leaderCode, password });
     if (res.ok) {
@@ -175,6 +222,7 @@ const App = {
         document.getElementById('modal-set-pw').classList.remove('hidden');
       } else {
         this.setSession(res.data);
+        AudioFX.playFanfare();
         alert(`반갑습니다, ${res.data.memberName} 트레이너님!`);
         Router.navigate('s7');
       }
@@ -193,7 +241,8 @@ const App = {
     if (res.ok) {
       document.getElementById('modal-set-pw').classList.add('hidden');
       this.setSession(res.data);
-      alert('비밀번호가 성공적으로 설정되었습니다!');
+      AudioFX.playFanfare();
+      alert('비밀번호 설정이 완료되었습니다!');
       Router.navigate('s7');
     } else alert(res.error ? res.error.message : '비밀번호 설정 실패');
   },
@@ -205,6 +254,7 @@ const App = {
     const res = await apiCall('login', { role: 'member', memberCode });
     if (res.ok) {
       this.setSession(res.data);
+      AudioFX.playSuccess();
       Router.navigate('s7');
     } else alert(res.error ? res.error.message : '팀원 코드 오류');
   },
@@ -216,24 +266,25 @@ const App = {
     const res = await apiCall('login', { role: 'admin', adminCode });
     if (res.ok) {
       this.setSession(res.data);
+      AudioFX.playFanfare();
       Router.navigate('s11');
     } else alert(res.error ? res.error.message : '관리자 코드 오류');
   },
 
   async loadUnassignedMembers() {
     const checklist = document.getElementById('s6-member-checklist');
-    checklist.innerHTML = '로딩 중...';
+    checklist.innerHTML = '명단 로딩 중...';
     const res = await apiCall('getMemberList', State.token);
     if (res.ok && res.data) {
       const list = res.data.unassigned || [];
       if (list.length === 0) {
-        checklist.innerHTML = '<div class="text-small">모든 학생이 팀 배정 완료되었습니다.</div>';
+        checklist.innerHTML = '<div style="font-size:12px;">모든 학생이 팀 배정 완료되었습니다.</div>';
         return;
       }
       checklist.innerHTML = '';
       list.forEach(m => {
         checklist.innerHTML += `
-          <label class="flex-row text-small mb-10">
+          <label style="display:flex; gap:6px; font-size:12px; margin-bottom:8px;">
             <input type="checkbox" name="team-member" value="${m.member_id}">
             <span>${m.name} (${m.class_info || '학생'})</span>
           </label>
@@ -247,12 +298,13 @@ const App = {
     const checkedBoxes = document.querySelectorAll('input[name="team-member"]:checked');
     const memberIds = Array.from(checkedBoxes).map(cb => cb.value);
 
-    if (!teamName) return alert('팀 이름을 입력하세요.');
+    if (!teamName) return alert('팀 이름을 입력해 주세요.');
 
     const res = await apiCall('createTeam', State.token, { teamName, emblem: 'ball_normal', memberIds });
     if (res.ok) {
       State.teamId = res.data.teamId;
       localStorage.setItem('POCKET_TEAM_ID', State.teamId);
+      AudioFX.playFanfare();
       alert(res.data.message);
       Router.navigate('s7');
     } else alert(res.error ? res.error.message : '팀 결성 실패');
@@ -260,20 +312,20 @@ const App = {
 
   async loadMissions() {
     const grid = document.getElementById('s7-mission-grid');
-    grid.innerHTML = '<div class="pokeball-spinner"></div>';
+    grid.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:20px; font-size:12px;">🌿 야생 포켓볼 탐색 중...</div>';
     const res = await apiCall('getMissions', State.token);
     if (res.ok && res.data) {
       const missions = res.data.missions || [];
       grid.innerHTML = '';
       missions.forEach(m => {
         const isAcquired = !!m.my_acquired;
-        const icon = m.acquire_type === 'gacha' ? '🔴' : (m.acquire_type === 'roulette' ? '🔵' : '🟡');
+        const ballClass = m.ball_type || (m.acquire_type === 'roulette' ? 'great' : 'normal');
         grid.innerHTML += `
-          <div class="mission-ball-card ${isAcquired ? 'acquired' : ''}" onclick="App.openMissionModal('${m.mission_id}')">
-            ${isAcquired ? '<div class="get-badge">GET!</div>' : ''}
-            <div class="ball-icon">${icon}</div>
-            <div style="font-weight:bold; font-size:14px;">${m.title}</div>
-            <div class="text-small text-gold">+${m.points} EXP</div>
+          <div class="grass-tile-card ${isAcquired ? 'got-it' : ''}" onclick="AudioFX.playClick(); App.openMissionModal('${m.mission_id}')">
+            ${isAcquired ? '<div class="badge-got">GET!</div>' : ''}
+            <div class="pokeball-sprite ${ballClass}"></div>
+            <div style="font-weight:bold; font-size:13px; margin-top:4px;">${m.title}</div>
+            <div class="text-gold" style="font-size:12px; font-weight:bold;">+${m.points} EXP</div>
           </div>
         `;
       });
@@ -317,10 +369,10 @@ const App = {
       el.style.height = '50%';
       el.style.transformOrigin = '100% 100%';
       el.style.transform = `rotate(${angle}deg)`;
-      el.style.background = idx % 2 === 0 ? '#E8A33D' : '#F5F3DE';
-      el.style.border = '1px solid #1F1F1F';
-      el.style.padding = '10px';
-      el.style.fontSize = '12px';
+      el.style.background = idx % 2 === 0 ? '#e8a33d' : '#f8f8f0';
+      el.style.border = '1px solid #202b15';
+      el.style.padding = '8px';
+      el.style.fontSize = '11px';
       el.textContent = s.substring(0, 6);
       wheel.appendChild(el);
     });
@@ -338,20 +390,21 @@ const App = {
       const text = document.getElementById('gacha-status-text');
       
       overlay.classList.remove('hidden');
-      ball.classList.add('opening');
+      ball.classList.add('shake-anim');
       text.textContent = '포켓볼이 꿈틀거린다...';
 
       const res = await apiCall('acquireMission', State.token, { missionId: m.mission_id });
 
       setTimeout(() => {
-        document.getElementById('flash-screen-el').classList.add('flash');
+        document.getElementById('flash-screen-el').classList.add('active');
+        AudioFX.playFanfare();
         setTimeout(() => {
-          ball.classList.remove('opening');
+          ball.classList.remove('shake-anim');
           overlay.classList.add('hidden');
-          document.getElementById('flash-screen-el').classList.remove('flash');
+          document.getElementById('flash-screen-el').classList.remove('active');
 
           if (res.ok) {
-            alert(`🎉 포켓볼 오픈 성공!\n\n획득 내용: [${res.data.slotContent}]`);
+            alert(`🎉 포켓볼 획득 성공!\n\n획득 미션: [${res.data.slotContent}]`);
             App.loadMissions();
           } else alert(res.error ? res.error.message : '획득 실패');
         }, 300);
@@ -360,6 +413,7 @@ const App = {
     } else {
       const res = await apiCall('acquireMission', State.token, { missionId: m.mission_id });
       if (res.ok) {
+        AudioFX.playFanfare();
         alert(`🎉 미션 획득 성공!\n\n내용: ${res.data.slotContent}`);
         App.loadMissions();
       } else alert(res.error ? res.error.message : '획득 실패');
@@ -368,26 +422,26 @@ const App = {
 
   async loadMyBag() {
     const list = document.getElementById('s9-bag-list');
-    list.innerHTML = '로딩 중...';
+    list.innerHTML = '가방 확인 중...';
     const res = await apiCall('getMyBag', State.token);
     if (res.ok && res.data) {
       document.getElementById('s9-team-title').textContent = `소속 팀: ${res.data.teamName || '미배정'}`;
       const items = res.data.items || [];
       if (items.length === 0) {
-        list.innerHTML = '<div class="gb-box text-small">획득한 미션이 없습니다. 풀숲에서 포켓볼을 던져보세요!</div>';
+        list.innerHTML = '<div class="gb-dialog-box" style="font-size:12px;">획득한 미션이 없습니다. 풀숲에서 포켓볼을 던져보세요!</div>';
         return;
       }
       list.innerHTML = '';
       items.forEach(item => {
-        const badgeColor = item.result === 'success' ? 'var(--hp-green)' : (item.result === 'fail' ? 'var(--ball-red)' : 'var(--gold-accent)');
+        const badgeBg = item.result === 'success' ? '#48a048' : (item.result === 'fail' ? '#e03838' : '#e8a33d');
         list.innerHTML += `
-          <div class="gb-box">
-            <div style="font-weight:bold;">${item.title}</div>
-            <div class="text-small mt-10">내용: ${item.slot_content}</div>
-            <div class="flex-row mt-10" style="justify-content:space-between;">
-              <span class="text-gold">+${item.points} EXP</span>
-              <span style="background:${badgeColor}; color:#FFF; padding:2px 6px; font-size:12px; border-radius:4px;">
-                ${item.result === 'success' ? '클리어!' : (item.result === 'fail' ? '실패' : '검토 대기중')}
+          <div class="gb-dialog-box">
+            <div style="font-weight:bold; font-size:14px;">${item.title}</div>
+            <div style="font-size:12px; margin-top:4px; color:#333;">수행 내용: ${item.slot_content}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+              <span class="text-gold" style="font-weight:bold; font-size:13px;">+${item.points} EXP</span>
+              <span style="background:${badgeBg}; color:#fff; padding:2px 6px; font-size:11px; border-radius:3px; font-weight:bold;">
+                ${item.result === 'success' ? 'CLEAR!' : (item.result === 'fail' ? 'FAIL' : '검토 대기')}
               </span>
             </div>
           </div>
@@ -401,21 +455,21 @@ const App = {
     const res = await apiCall('getRanking', State.token);
     if (res.ok && res.data) {
       if (res.data.hidden) {
-        list.innerHTML = `<div class="gb-box text-center">${res.data.message}</div>`;
+        list.innerHTML = `<div class="gb-dialog-box text-center">${res.data.message}</div>`;
         return;
       }
-      document.getElementById('s10-updated-at').textContent = `최근 갱신: ${new Date().toLocaleTimeString()}`;
+      document.getElementById('s10-updated-at').textContent = `실시간 순위 (${new Date().toLocaleTimeString()})`;
       const ranking = res.data.ranking || [];
       list.innerHTML = '';
       ranking.forEach(t => {
         list.innerHTML += `
-          <div class="trainer-card ${t.rank === 1 ? 'top1' : ''}">
-            <div class="rank-badge">${t.rank}</div>
-            <div class="team-info">
-              <div class="team-name">${t.team_name}</div>
-              <div class="team-members">트레이너: ${(t.members || []).join(', ')}</div>
+          <div class="trainer-card-row ${t.rank <= 3 ? 'rank-' + t.rank : ''}">
+            <div class="rank-badge-box">${t.rank}</div>
+            <div class="team-meta">
+              <div class="team-title">${t.team_name}</div>
+              <div class="team-members-sub">트레이너: ${(t.members || []).join(', ')}</div>
             </div>
-            <div class="exp-points">${t.total_points} P</div>
+            <div class="score-display">${t.total_points} P</div>
           </div>
         `;
       });
@@ -442,18 +496,18 @@ const App = {
       const pending = res.data.pendingLogs || [];
       const list = document.getElementById('admin-pending-list');
       if (pending.length === 0) {
-        list.innerHTML = '<div class="gb-box text-small">대기 중인 판정이 없습니다.</div>';
+        list.innerHTML = '<div class="gb-dialog-box" style="font-size:12px;">대기 중인 판정이 없습니다.</div>';
         return;
       }
       list.innerHTML = '';
       pending.forEach(item => {
         list.innerHTML += `
-          <div class="gb-box">
+          <div class="gb-dialog-box">
             <div style="font-weight:bold;">${item.team_name} - ${item.mission_title}</div>
-            <div class="text-small mt-10">수행 내용: ${item.slot_content} (+${item.points} P)</div>
-            <div class="flex-row mt-10">
-              <button class="gb-btn gb-btn-success" onclick="App.handleAdminJudge('${item.log_id}', 'success')">⭕ 성공 승인</button>
-              <button class="gb-btn gb-btn-danger" onclick="App.handleAdminJudge('${item.log_id}', 'fail')">❌ 실패 처리</button>
+            <div style="font-size:12px; margin-top:4px;">수행 내용: ${item.slot_content} (+${item.points} P)</div>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+              <button class="game-btn game-btn-green" onclick="AudioFX.playClick(); App.handleAdminJudge('${item.log_id}', 'success')">⭕ 승인</button>
+              <button class="game-btn game-btn-red" onclick="AudioFX.playClick(); App.handleAdminJudge('${item.log_id}', 'fail')">❌ 실패</button>
             </div>
           </div>
         `;
@@ -464,6 +518,7 @@ const App = {
   async handleAdminJudge(logId, result) {
     const res = await apiCall('adminJudge', State.token, { logId, result });
     if (res.ok) {
+      AudioFX.playSuccess();
       alert(res.data.message);
       this.loadAdminDashboard();
     }
@@ -475,6 +530,7 @@ const App = {
     const names = raw.split('\n').map(n => ({ name: n.trim() })).filter(n => n.name);
     const res = await apiCall('adminUpsertMembers', State.token, names);
     if (res.ok) {
+      AudioFX.playSuccess();
       alert(res.data.message);
       document.getElementById('adm-mem-text').value = '';
     }
@@ -483,7 +539,10 @@ const App = {
   async handleAdminRandomAssign() {
     if (!confirm('미배정 학생들을 기존 팀에 균등 분산 배치하시겠습니까?')) return;
     const res = await apiCall('adminRandomAssign', State.token, {});
-    if (res.ok) alert(res.data.message);
+    if (res.ok) {
+      AudioFX.playSuccess();
+      alert(res.data.message);
+    }
   },
 
   async handleAdminSetPhase(phase) {
@@ -492,7 +551,7 @@ const App = {
   },
 
   async handleAdminPurgeData() {
-    if (!confirm('⚠ 정말로 행사 종료 후 개인정보를 파기하시겠습니까? (이 작업은 되돌릴 수 없습니다!)')) return;
+    if (!confirm('⚠ 정말로 행사 종료 후 개인정보를 파기하시겠습니까?')) return;
     const res = await apiCall('adminPurgeData', State.token);
     if (res.ok) alert(res.data.message);
   }

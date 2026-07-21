@@ -1,9 +1,10 @@
 <style>
 /* ==========================================================================
-   🎮 POCKET FIELD ADVENTURE - GBC RETRO DESIGN SYSTEM (css.html)
-   GameBoy Color (GBC) Pokemon Gold Homage Theme
+   🎮 POCKET FIELD ADVENTURE - ULTIMATE GBC GAME UI/UX DESIGN SYSTEM
+   Authentic Retro Handheld Game Console Aesthetic (Game Boy Color Style)
    ========================================================================== */
 
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 @import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/NeoDunggeunmo.woff');
 
 @font-face {
@@ -14,22 +15,26 @@
 }
 
 :root {
-  /* GBC Palette Tokens */
-  --gb-darkest: #1F1F1F;
-  --gb-dark: #55555E;
-  --gb-light: #C5C7A6;
-  --gb-lightest: #F5F3DE;
+  /* GBC Console Body Colors */
+  --gbc-body-color: #3b2a56; /* Game Boy Atomic Purple / Indigo */
+  --gbc-bezel-color: #1a162b;
+  --gbc-screen-bg: #c4ca9c;   /* Classic GBC Khaki Matrix Screen */
+  --gbc-screen-dark: #202b15;
   
-  /* Accent Colors */
-  --gold-accent: #E8A33D;
-  --ball-red: #D84B3E;
-  --hp-green: #58A458;
-  --great-blue: #3E82D8;
-  --ultra-yellow: #F4C430;
-  --master-purple: #8B44A8;
+  /* Game UI Palette */
+  --gbc-yellow: #f8d030;
+  --gbc-gold: #e8a33d;
+  --gbc-red: #e03838;
+  --gbc-dark-red: #982020;
+  --gbc-blue: #386ce0;
+  --gbc-purple: #8838e0;
+  --gbc-green: #48a048;
+  --gbc-dark: #1f1f2e;
+  --gbc-light: #f8f8f0;
 
   /* Typography */
-  --font-pixel: 'NeoDunggeunmo', 'Courier New', monospace;
+  --font-pixel-kr: 'NeoDunggeunmo', sans-serif;
+  --font-pixel-en: 'Press Start 2P', monospace;
 }
 
 * {
@@ -41,90 +46,599 @@
 }
 
 body {
-  background-color: var(--gb-darkest);
-  color: var(--gb-darkest);
-  font-family: var(--font-pixel);
-  font-size: 16px;
+  background: #0f0c1b;
+  background-image: 
+    radial-gradient(#2d224d 1px, transparent 1px),
+    radial-gradient(#2d224d 1px, #0f0c1b 1px);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+  color: var(--gbc-dark);
+  font-family: var(--font-pixel-kr);
+  font-size: 15px;
   line-height: 1.4;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  padding: 10px;
   overflow-x: hidden;
   image-rendering: pixelated;
-  image-rendering: crisp-edges;
 }
 
 /* ==========================================================================
-   📱 Mobile-First GBC Screen Frame
+   🎮 GAME BOY CONSOLE BODY WRAPPER
    ========================================================================== */
 
-#app-viewport {
+.console-outer-shell {
   width: 100%;
-  max-width: 430px;
-  height: 100vh;
-  max-height: 900px;
-  background-color: var(--gb-light);
-  border: 4px solid var(--gb-darkest);
+  max-width: 440px;
+  background: linear-gradient(145deg, #463467 0%, #291c3f 100%);
+  border-radius: 20px 20px 50px 20px;
+  padding: 20px 16px 24px 16px;
+  box-shadow: 
+    0 15px 35px rgba(0,0,0,0.8),
+    inset 0 2px 4px rgba(255,255,255,0.2),
+    inset 0 -4px 8px rgba(0,0,0,0.6);
+  border: 3px solid #1a1229;
   display: flex;
   flex-direction: column;
   position: relative;
-  box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.2);
-  overflow: hidden;
 }
 
-@media (min-width: 450px) {
-  #app-viewport {
-    height: 860px;
-    border-radius: 12px;
-    margin: 20px auto;
-  }
+/* Screen Bezel Header */
+.console-bezel {
+  background: var(--gbc-bezel-color);
+  border-radius: 12px 12px 35px 12px;
+  padding: 16px 14px 14px 14px;
+  box-shadow: inset 0 3px 8px rgba(0,0,0,0.9);
+  position: relative;
 }
 
-/* Header Bar */
-header.gb-header {
-  background-color: var(--gb-darkest);
-  color: var(--gb-lightest);
-  padding: 10px 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 4px solid var(--gold-accent);
-  font-size: 14px;
-  z-index: 10;
-}
-
-header.gb-header .logo-title {
+/* Power LED */
+.power-led-container {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--gold-accent);
+  position: absolute;
+  top: 6px;
+  left: 16px;
+  font-family: var(--font-pixel-en);
+  font-size: 8px;
+  color: #6e6587;
+}
+
+.power-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff3b3b;
+  box-shadow: 0 0 8px #ff3b3b;
+  animation: led-pulse 2s infinite;
+}
+
+@keyframes led-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.bezel-logo {
+  text-align: center;
+  margin-bottom: 8px;
+  font-family: var(--font-pixel-en);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #9d94b8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.bezel-logo span.gbc-color {
+  background: linear-gradient(90deg, #ff3b3b, #f8d030, #386ce0, #48a048);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-weight: bold;
 }
 
-header.gb-header .user-badge {
-  background-color: var(--gb-dark);
-  color: var(--gb-lightest);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+/* CRT Screen Window */
+#app-viewport {
+  width: 100%;
+  height: 580px;
+  background-color: var(--gbc-screen-bg);
+  border: 4px solid #0d0a14;
+  border-radius: 6px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: inset 0 0 15px rgba(32, 43, 21, 0.4);
 }
 
-/* Main Screen Scroll Area */
+/* CRT Scanlines Effect */
+#app-viewport::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.08) 50%);
+  background-size: 100% 4px;
+  z-index: 99;
+  pointer-events: none;
+}
+
+/* Top Game Status HUD Bar */
+.game-hud {
+  background-color: #202b15;
+  color: #c4ca9c;
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  border-bottom: 3px solid #0d0a14;
+  z-index: 10;
+}
+
+.hud-player-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-level-badge {
+  background: var(--gbc-yellow);
+  color: var(--gbc-dark);
+  font-family: var(--font-pixel-en);
+  font-size: 10px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-weight: bold;
+}
+
+.hud-exp-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.exp-bar-bg {
+  width: 60px;
+  height: 8px;
+  background: #0d0a14;
+  border: 1px solid #c4ca9c;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.exp-bar-fill {
+  height: 100%;
+  width: 75%;
+  background: linear-gradient(90deg, #48a048, #f8d030);
+  transition: width 0.3s ease;
+}
+
+/* Main Game Display Scroll Container */
 main.gb-main {
   flex: 1;
   overflow-y: auto;
-  padding: 14px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   position: relative;
 }
 
-/* Bottom Nav Bar */
+/* Custom GBC Scrollbar */
+main.gb-main::-webkit-scrollbar {
+  width: 6px;
+}
+main.gb-main::-webkit-scrollbar-track {
+  background: #a3ab78;
+}
+main.gb-main::-webkit-scrollbar-thumb {
+  background: #202b15;
+  border-radius: 3px;
+}
+
+/* ==========================================================================
+   🎮 GAME BOY UI COMPONENTS (Boxes, Dialogs, Cards)
+   ========================================================================== */
+
+/* Retro Game Dialog Box */
+.gb-dialog-box {
+  background: #f8f8f0;
+  border: 4px solid #202b15;
+  outline: 2px solid #f8f8f0;
+  box-shadow: 
+    inset -3px -3px 0px #d0d0c0,
+    inset 3px 3px 0px #ffffff;
+  padding: 10px 14px;
+  position: relative;
+  border-radius: 4px;
+}
+
+.gb-dialog-box.dark {
+  background: #202b15;
+  color: #f8f8f0;
+  border-color: #f8f8f0;
+  outline-color: #202b15;
+}
+
+.dialog-text {
+  font-size: 14px;
+  color: #202b15;
+  line-height: 1.5;
+  min-height: 42px;
+}
+
+.gb-dialog-box.dark .dialog-text {
+  color: #f8f8f0;
+}
+
+/* Bouncing Arrow */
+.dialog-arrow {
+  position: absolute;
+  bottom: 4px;
+  right: 8px;
+  font-size: 10px;
+  color: #e03838;
+  animation: prompt-bounce 0.6s infinite ease-in-out alternate;
+}
+
+@keyframes prompt-bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(3px); }
+}
+
+/* Retro Buttons */
+.game-btn {
+  font-family: var(--font-pixel-kr);
+  font-size: 14px;
+  padding: 10px 14px;
+  min-height: 44px;
+  background: linear-gradient(180deg, #ffffff 0%, #e0e0d0 100%);
+  color: #202b15;
+  border: 3px solid #202b15;
+  border-radius: 4px;
+  box-shadow: 
+    0 4px 0 #202b15,
+    inset 0 2px 0 #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  font-weight: bold;
+  position: relative;
+  transition: all 0.05s ease;
+}
+
+.game-btn:hover {
+  background: #f8f8e8;
+  transform: translateY(-1px);
+}
+
+.game-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #202b15;
+}
+
+.game-btn-gold {
+  background: linear-gradient(180deg, #ffe870 0%, #e8a33d 100%);
+  color: #202b15;
+}
+
+.game-btn-red {
+  background: linear-gradient(180deg, #ff6b6b 0%, #e03838 100%);
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #202b15;
+}
+
+.game-btn-blue {
+  background: linear-gradient(180deg, #6ba5ff 0%, #386ce0 100%);
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #202b15;
+}
+
+.game-btn-green {
+  background: linear-gradient(180deg, #70ff70 0%, #48a048 100%);
+  color: #202b15;
+}
+
+.game-btn-block {
+  width: 100%;
+}
+
+/* Form Inputs */
+.game-input {
+  font-family: var(--font-pixel-kr);
+  font-size: 14px;
+  padding: 10px;
+  width: 100%;
+  border: 3px solid #202b15;
+  background-color: #f8f8f0;
+  color: #202b15;
+  border-radius: 4px;
+  outline: none;
+  box-shadow: inset 2px 2px 0 rgba(0,0,0,0.1);
+}
+
+.game-input:focus {
+  border-color: #e8a33d;
+  background: #ffffff;
+}
+
+/* ==========================================================================
+   🌿 WILD GRASS FIELD GRID (S7)
+   ========================================================================== */
+
+.grass-field-container {
+  background: #88a050;
+  background-image: 
+    radial-gradient(#486820 20%, transparent 20%),
+    radial-gradient(#486820 20%, transparent 20%);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+  border: 4px solid #202b15;
+  border-radius: 6px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+}
+
+.grass-tile-card {
+  background: #f8f8f0;
+  border: 3px solid #202b15;
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 4px 0 #202b15;
+  transition: transform 0.1s;
+}
+
+.grass-tile-card:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #202b15;
+}
+
+.grass-tile-card.got-it {
+  background: #d0e8b0;
+  border-color: #48a048;
+}
+
+.pokeball-sprite {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(180deg, #e03838 45%, #202b15 45%, #202b15 55%, #ffffff 55%);
+  border: 3px solid #202b15;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.3);
+  animation: pokeball-idle 2.5s infinite ease-in-out;
+}
+
+.pokeball-sprite::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px; height: 14px;
+  background: #ffffff;
+  border: 3px solid #202b15;
+  border-radius: 50%;
+}
+
+.pokeball-sprite.great {
+  background: linear-gradient(180deg, #386ce0 45%, #202b15 45%, #202b15 55%, #ffffff 55%);
+}
+
+.pokeball-sprite.ultra {
+  background: linear-gradient(180deg, #f8d030 45%, #202b15 45%, #202b15 55%, #ffffff 55%);
+}
+
+@keyframes pokeball-idle {
+  0%, 85%, 100% { transform: translateY(0) rotate(0deg); }
+  90% { transform: translateY(-4px) rotate(-8deg); }
+  95% { transform: translateY(-4px) rotate(8deg); }
+}
+
+.badge-got {
+  position: absolute;
+  top: 4px; right: 4px;
+  background: #48a048;
+  color: #ffffff;
+  font-size: 10px;
+  padding: 1px 5px;
+  border: 1px solid #202b15;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+/* ==========================================================================
+   🏆 GYM LEADERBOARD TRAINER CARDS (S10)
+   ========================================================================== */
+
+.trainer-card-row {
+  background: #f8f8f0;
+  border: 3px solid #202b15;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 3px 0 #202b15;
+  position: relative;
+}
+
+.trainer-card-row.rank-1 {
+  background: linear-gradient(135deg, #fff3b0 0%, #ffe870 100%);
+  border-color: #b8860b;
+}
+
+.trainer-card-row.rank-2 {
+  background: linear-gradient(135deg, #f0f0f0 0%, #d0d0d0 100%);
+}
+
+.trainer-card-row.rank-3 {
+  background: linear-gradient(135deg, #ffe0c0 0%, #e8a33d 100%);
+}
+
+.rank-badge-box {
+  width: 32px; height: 32px;
+  background: #202b15;
+  color: #f8d030;
+  font-family: var(--font-pixel-en);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  border: 2px solid #f8d030;
+  font-weight: bold;
+}
+
+.team-meta {
+  flex: 1;
+}
+
+.team-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: #202b15;
+}
+
+.team-members-sub {
+  font-size: 12px;
+  color: #555566;
+}
+
+.score-display {
+  font-family: var(--font-pixel-en);
+  font-size: 14px;
+  color: #e03838;
+  font-weight: bold;
+}
+
+/* ==========================================================================
+   ✨ GACHA / ROULETTES MODALS & ANIMATIONS
+   ========================================================================== */
+
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(13, 10, 20, 0.88);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.gacha-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.gacha-ball-giant {
+  width: 100px; height: 100px;
+  background: linear-gradient(180deg, #e03838 45%, #202b15 45%, #202b15 55%, #ffffff 55%);
+  border: 5px solid #202b15;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 8px 0 rgba(0,0,0,0.6);
+}
+
+.gacha-ball-giant::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 28px; height: 28px;
+  background: #ffffff;
+  border: 4px solid #202b15;
+  border-radius: 50%;
+}
+
+.gacha-ball-giant.shake-anim {
+  animation: gacha-open-seq 1.2s forwards ease-in-out;
+}
+
+@keyframes gacha-open-seq {
+  0% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.1) rotate(-18deg); }
+  50% { transform: scale(1.1) rotate(18deg); }
+  75% { transform: scale(1.25) rotate(-25deg); filter: brightness(1.4); }
+  100% { transform: scale(1.5); filter: brightness(3); opacity: 0; }
+}
+
+.gacha-flash-screen {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #ffffff;
+  z-index: 1001;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gacha-flash-screen.active {
+  animation: gacha-flash 0.4s ease-out;
+}
+
+@keyframes gacha-flash {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Roulettes Wheel */
+.arcade-roulette-wheel {
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  border: 6px solid #202b15;
+  position: relative;
+  overflow: hidden;
+  margin: 10px auto;
+  background: #f8d030;
+  box-shadow: 0 6px 0 #202b15;
+}
+
+.roulette-inner-wheel {
+  width: 100%; height: 100%;
+  position: relative;
+  transition: transform 3s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+.roulette-top-pointer {
+  position: absolute;
+  top: -8px; left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 20px solid #e03838;
+  z-index: 20;
+}
+
+/* ==========================================================================
+   🎮 GAME CONSOLE BOTTOM NAVIGATION
+   ========================================================================== */
+
 nav.gb-navbar {
-  background-color: var(--gb-darkest);
-  border-top: 4px solid var(--gb-dark);
+  background-color: #202b15;
+  border-top: 4px solid #0d0a14;
   display: flex;
   justify-content: space-around;
   padding: 6px 0;
@@ -134,19 +648,19 @@ nav.gb-navbar {
 .nav-item {
   background: none;
   border: none;
-  color: var(--gb-light);
-  font-family: var(--font-pixel);
-  font-size: 12px;
+  color: #a3ab78;
+  font-family: var(--font-pixel-kr);
+  font-size: 11px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 6px 12px;
+  padding: 4px 8px;
   cursor: pointer;
 }
 
 .nav-item.active {
-  color: var(--gold-accent);
+  color: #f8d030;
   font-weight: bold;
 }
 
@@ -155,351 +669,76 @@ nav.gb-navbar {
 }
 
 /* ==========================================================================
-   💬 GBC Dialog Box & Pixel Borders
+   🕹 HARDWARE CONTROLLER BUTTONS (D-PAD & A/B BUTTONS)
    ========================================================================== */
 
-.gb-box {
-  background-color: var(--gb-lightest);
-  border: 4px solid var(--gb-darkest);
-  box-shadow: inset -2px -2px 0px var(--gb-dark), inset 2px 2px 0px #FFF;
-  padding: 12px;
-  position: relative;
-}
-
-.gb-dialog {
-  background-color: var(--gb-lightest);
-  border: 4px solid var(--gb-darkest);
-  outline: 2px solid var(--gb-lightest);
-  box-shadow: inset -3px -3px 0px #BBB, inset 3px 3px 0px #FFF;
-  padding: 12px 14px;
-  position: relative;
-  min-height: 70px;
-}
-
-.gb-dialog::after {
-  content: '▼';
-  position: absolute;
-  bottom: 6px;
-  right: 10px;
-  font-size: 12px;
-  color: var(--gb-darkest);
-  animation: dialog-blink 0.8s infinite;
-}
-
-@keyframes dialog-blink {
-  0%, 100% { opacity: 1; transform: translateY(0); }
-  50% { opacity: 0; transform: translateY(2px); }
-}
-
-/* ==========================================================================
-   🔘 Pixel Buttons
-   ========================================================================== */
-
-.gb-btn {
-  font-family: var(--font-pixel);
-  font-size: 16px;
-  padding: 10px 16px;
-  min-height: 44px;
-  background-color: var(--gb-lightest);
-  color: var(--gb-darkest);
-  border: 4px solid var(--gb-darkest);
-  box-shadow: inset -3px -3px 0px var(--gb-dark), inset 3px 3px 0px #FFF;
-  cursor: pointer;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  text-align: center;
-  transition: transform 0.05s ease;
-}
-
-.gb-btn:active {
-  transform: translate(2px, 2px);
-  box-shadow: inset 2px 2px 0px var(--gb-dark);
-}
-
-.gb-btn-primary {
-  background-color: var(--gold-accent);
-  color: var(--gb-darkest);
-  font-weight: bold;
-}
-
-.gb-btn-danger {
-  background-color: var(--ball-red);
-  color: #FFF;
-}
-
-.gb-btn-success {
-  background-color: var(--hp-green);
-  color: #FFF;
-}
-
-.gb-btn-block {
-  width: 100%;
-}
-
-/* Inputs */
-.gb-input {
-  font-family: var(--font-pixel);
-  font-size: 15px;
-  padding: 10px;
-  width: 100%;
-  border: 3px solid var(--gb-darkest);
-  background-color: var(--gb-lightest);
-  color: var(--gb-darkest);
-  outline: none;
-}
-
-.gb-input:focus {
-  background-color: #FFF;
-  border-color: var(--gold-accent);
-}
-
-/* ==========================================================================
-   🏆 Trainer Card & Ranking List
-   ========================================================================== */
-
-.trainer-card {
-  background-color: var(--gb-lightest);
-  border: 4px solid var(--gb-darkest);
-  padding: 10px;
+.console-controls-area {
   display: flex;
+  justify-content: space-between;
   align-items: center;
+  margin-top: 14px;
+  padding: 0 10px;
+}
+
+/* D-PAD */
+.dpad {
+  width: 72px; height: 72px;
+  position: relative;
+}
+
+.dpad-btn {
+  position: absolute;
+  background: #1a162b;
+  border: 1px solid #0d0a14;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.dpad-up { top: 0; left: 24px; width: 24px; height: 26px; border-radius: 4px 4px 0 0; }
+.dpad-down { bottom: 0; left: 24px; width: 24px; height: 26px; border-radius: 0 0 4px 4px; }
+.dpad-left { top: 24px; left: 0; width: 26px; height: 24px; border-radius: 4px 0 0 4px; }
+.dpad-right { top: 24px; right: 0; width: 26px; height: 24px; border-radius: 0 4px 4px 0; }
+.dpad-center { top: 24px; left: 24px; width: 24px; height: 24px; background: #1a162b; }
+
+/* A/B Action Buttons */
+.action-buttons {
+  display: flex;
   gap: 12px;
-  position: relative;
+  transform: rotate(-15deg);
 }
 
-.trainer-card.top1 {
-  border-color: var(--gold-accent);
-  background: linear-gradient(135deg, var(--gb-lightest) 80%, #FFEBAA 100%);
-}
-
-.trainer-card .rank-badge {
-  width: 36px;
-  height: 36px;
-  background-color: var(--gb-darkest);
-  color: var(--gold-accent);
-  font-size: 18px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--gold-accent);
-}
-
-.trainer-card .team-info {
-  flex: 1;
-}
-
-.trainer-card .team-name {
-  font-size: 16px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.trainer-card .team-members {
+.ab-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #a02838 0%, #681820 100%);
+  border: 2px solid #1a162b;
+  color: #ffffff;
+  font-family: var(--font-pixel-en);
   font-size: 12px;
-  color: var(--gb-dark);
-}
-
-.trainer-card .exp-points {
-  font-size: 18px;
   font-weight: bold;
-  color: var(--ball-red);
-}
-
-/* ==========================================================================
-   🔴 Field Grass Grid & Pokeball Cards
-   ========================================================================== */
-
-.grass-grid {
-  background-color: #A3AF83;
-  border: 4px solid var(--gb-darkest);
-  padding: 12px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  background-image: radial-gradient(var(--gb-dark) 15%, transparent 16%);
-  background-size: 16px 16px;
-}
-
-.mission-ball-card {
-  background-color: var(--gb-lightest);
-  border: 3px solid var(--gb-darkest);
-  padding: 10px;
-  text-align: center;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  position: relative;
-}
-
-.mission-ball-card.acquired {
-  background-color: #E2E4CD;
-  border-color: var(--hp-green);
-}
-
-.mission-ball-card .ball-icon {
-  font-size: 36px;
-  animation: ball-shake 2s infinite ease-in-out;
-}
-
-.mission-ball-card.closed .ball-icon {
-  filter: grayscale(100%);
-  animation: none;
-}
-
-@keyframes ball-shake {
-  0%, 80%, 100% { transform: rotate(0deg); }
-  85% { transform: rotate(-10deg); }
-  90% { transform: rotate(10deg); }
-  95% { transform: rotate(-5deg); }
-}
-
-.get-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background-color: var(--hp-green);
-  color: #FFF;
-  font-size: 10px;
-  padding: 2px 4px;
-  border: 1px solid var(--gb-darkest);
-}
-
-/* ==========================================================================
-   ✨ Gacha Pokeball Open Sequence Animation
-   ========================================================================== */
-
-.gacha-modal {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(31,31,31,0.9);
-  display: flex;
-  flex-direction: column;
   justify-content: center;
-  align-items: center;
-  z-index: 100;
-  padding: 20px;
+  box-shadow: 0 4px 0 #1a162b, inset 0 2px 0 rgba(255,255,255,0.3);
+  cursor: pointer;
 }
 
-.gacha-ball {
-  width: 120px;
-  height: 120px;
-  background: linear-gradient(to bottom, var(--ball-red) 48%, var(--gb-darkest) 48%, var(--gb-darkest) 52%, #FFF 52%);
-  border: 6px solid var(--gb-darkest);
-  border-radius: 50%;
-  position: relative;
-  box-shadow: 0 8px 0 rgba(0,0,0,0.4);
+.ab-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #1a162b;
 }
 
-.gacha-ball::after {
-  content: '';
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 32px; height: 32px;
-  background: #FFF;
-  border: 5px solid var(--gb-darkest);
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 2px #DDD;
+/* Sound Toggle Switch */
+.sound-toggle-btn {
+  background: none;
+  border: none;
+  color: #c4ca9c;
+  cursor: pointer;
+  font-size: 14px;
 }
-
-.gacha-ball.opening {
-  animation: gacha-shake-open 1.2s forwards;
-}
-
-@keyframes gacha-shake-open {
-  0% { transform: scale(1) rotate(0deg); }
-  20% { transform: scale(1.1) rotate(-15deg); }
-  40% { transform: scale(1.1) rotate(15deg); }
-  60% { transform: scale(1.2) rotate(-20deg); }
-  80% { transform: scale(1.3) rotate(20deg); filter: brightness(1.5); }
-  100% { transform: scale(1.5); filter: brightness(3); opacity: 0; }
-}
-
-/* Flash effect */
-.flash-screen {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: #FFF;
-  z-index: 101;
-  opacity: 0;
-  pointer-events: none;
-}
-.flash-screen.flash {
-  animation: flash-anim 0.5s ease-out;
-}
-@keyframes flash-anim {
-  0% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-/* ==========================================================================
-   🎰 Roulette Wheel Animation
-   ========================================================================== */
-
-.roulette-container {
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  border: 6px solid var(--gb-darkest);
-  position: relative;
-  overflow: hidden;
-  margin: 10px auto;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-  background-color: var(--gold-accent);
-}
-
-.roulette-wheel {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  transition: transform 3s cubic-bezier(0.15, 0.9, 0.2, 1);
-}
-
-.roulette-pointer {
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0; height: 0;
-  border-left: 14px solid transparent;
-  border-right: 14px solid transparent;
-  border-top: 24px solid var(--ball-red);
-  z-index: 20;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
-}
-
-/* ==========================================================================
-   ⚙ Helper Utilities
-   ========================================================================== */
 
 .hidden { display: none !important; }
 .text-center { text-align: center; }
-.text-small { font-size: 13px; color: var(--gb-dark); }
-.text-gold { color: var(--gold-accent); }
+.text-gold { color: #e8a33d; }
 .mt-10 { margin-top: 10px; }
 .mt-14 { margin-top: 14px; }
-.mb-10 { margin-bottom: 10px; }
-.flex-column { display: flex; flex-direction: column; gap: 10px; }
-.flex-row { display: flex; gap: 10px; align-items: center; }
-
-/* Loading Spinner */
-.pokeball-spinner {
-  width: 40px; height: 40px;
-  background: linear-gradient(to bottom, var(--ball-red) 48%, var(--gb-darkest) 48%, var(--gb-darkest) 52%, #FFF 52%);
-  border: 3px solid var(--gb-darkest);
-  border-radius: 50%;
-  animation: spin 1s infinite linear;
-  margin: 20px auto;
-}
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
 </style>
