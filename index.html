@@ -196,18 +196,6 @@
     100% { opacity: 0; }
   }
 
-  /* Wipe transition */
-  .screen-transition.wipe {
-    animation: screen-wipe 0.6s steps(8);
-  }
-
-  @keyframes screen-wipe {
-    0% { clip-path: inset(0 100% 0 0); opacity: 1; }
-    50% { clip-path: inset(0 0 0 0); opacity: 1; }
-    51% { background: var(--gbc-lightest); clip-path: inset(0 0 0 0); opacity: 1; }
-    100% { clip-path: inset(0 0 0 100%); opacity: 0; }
-  }
-
   /* ===== TOP HUD BAR ===== */
   .hud-bar {
     background: var(--gbc-darkest);
@@ -264,19 +252,22 @@
     border-radius: 2px;
   }
 
-  .sound-toggle {
+  .sound-toggle, .logout-btn {
     background: none;
     border: 1px solid var(--gbc-light);
     color: var(--gbc-lightest);
-    font-size: 12px;
-    width: 22px; height: 22px;
+    font-size: 11px;
+    height: 22px;
+    padding: 0 5px;
     cursor: pointer;
     border-radius: 2px;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-family: var(--font-game);
   }
-  .sound-toggle:active { background: var(--gbc-dark); }
+  .sound-toggle:active, .logout-btn:active { background: var(--gbc-dark); }
+  .logout-btn { border-color: var(--red-pokeball); color: #ffa0a0; }
 
   /* ===== MAIN CONTENT AREA ===== */
   .game-viewport {
@@ -287,7 +278,6 @@
     z-index: 1;
   }
 
-  /* Custom scrollbar (pixel style) */
   .game-viewport::-webkit-scrollbar { width: 6px; }
   .game-viewport::-webkit-scrollbar-track { background: var(--gbc-light); }
   .game-viewport::-webkit-scrollbar-thumb { 
@@ -324,7 +314,6 @@
     position: relative;
   }
 
-  /* Animated grass tiles at bottom */
   .title-screen::after {
     content: '';
     position: absolute;
@@ -345,7 +334,6 @@
     to { background-position-x: 28px; }
   }
 
-  /* Big Pokeball sprite */
   .title-pokeball {
     width: 80px; height: 80px;
     margin: 0 auto 12px auto;
@@ -397,21 +385,6 @@
     75% { transform: translateY(0) rotate(0deg); }
   }
 
-  /* Title sparkle effect */
-  .title-pokeball::after {
-    content: '✦';
-    position: absolute;
-    top: -6px; right: -6px;
-    color: var(--gold-primary);
-    font-size: 16px;
-    animation: sparkle 1s ease-in-out infinite;
-  }
-
-  @keyframes sparkle {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.3; transform: scale(0.5); }
-  }
-
   .title-text {
     font-family: var(--font-pixel);
     font-size: 16px;
@@ -441,7 +414,6 @@
     margin-top: 4px;
   }
 
-  /* Blinking "Press Start" style text */
   .press-start {
     font-family: var(--font-pixel);
     font-size: 9px;
@@ -485,7 +457,6 @@
     padding: 10px;
   }
 
-  /* ===== GBC MENU ITEM / SELECT ARROW ===== */
   .menu-item {
     font-family: var(--font-game);
     font-size: 15px;
@@ -538,12 +509,11 @@
     font-weight: bold;
   }
 
-  /* Color variants */
   .menu-item--gold { border-left: 4px solid var(--gold-primary); }
   .menu-item--red { border-left: 4px solid var(--red-pokeball); }
   .menu-item--blue { border-left: 4px solid var(--blue-water); }
 
-  /* ===== GBC DIALOG BOX (RPG text box) ===== */
+  /* ===== GBC DIALOG BOX ===== */
   .gbc-dialog {
     background: var(--menu-bg);
     border: 3px solid var(--menu-border);
@@ -558,7 +528,6 @@
     position: relative;
   }
 
-  /* Dialog arrow indicator */
   .gbc-dialog::after {
     content: '▼';
     position: absolute;
@@ -620,23 +589,11 @@
       inset 2px 2px 0 rgba(255,255,255,0.3);
   }
 
-  .gbc-btn--gold {
-    background: linear-gradient(180deg, var(--gold-primary), var(--gold-dark));
-  }
-  .gbc-btn--red {
-    background: linear-gradient(180deg, #f86058, var(--red-dark));
-    color: #fff;
-  }
-  .gbc-btn--blue {
-    background: linear-gradient(180deg, #58a0f8, var(--blue-dark));
-    color: #fff;
-  }
-  .gbc-btn--green {
-    background: linear-gradient(180deg, var(--gbc-light), var(--gbc-dark));
-  }
-  .gbc-btn--white {
-    background: linear-gradient(180deg, #f8f8f8, #d0d0d0);
-  }
+  .gbc-btn--gold { background: linear-gradient(180deg, var(--gold-primary), var(--gold-dark)); }
+  .gbc-btn--red { background: linear-gradient(180deg, #f86058, var(--red-dark)); color: #fff; }
+  .gbc-btn--blue { background: linear-gradient(180deg, #58a0f8, var(--blue-dark)); color: #fff; }
+  .gbc-btn--green { background: linear-gradient(180deg, var(--gbc-light), var(--gbc-dark)); }
+  .gbc-btn--white { background: linear-gradient(180deg, #f8f8f8, #d0d0d0); }
 
   /* ===== GBC INPUT FIELDS ===== */
   .gbc-input {
@@ -656,11 +613,6 @@
     border-color: var(--gold-primary);
     background: #fff;
     box-shadow: inset 2px 2px 0 rgba(0,0,0,0.1), 0 0 0 2px rgba(248,208,48,0.3);
-  }
-
-  .gbc-input::placeholder {
-    color: var(--gbc-dark);
-    opacity: 0.6;
   }
 
   .gbc-select {
@@ -691,38 +643,19 @@
     margin-top: 8px;
   }
 
-  /* ===== FORM LAYOUT HELPERS ===== */
-  .form-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .btn-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 10px;
-  }
+  .form-stack { display: flex; flex-direction: column; gap: 6px; }
+  .btn-stack { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 
   /* ===== SCREEN BACKGROUNDS ===== */
-  .screen-bg-town {
-    background: linear-gradient(180deg, #a8d8f8 0%, #88c070 30%, #58a050 100%);
-    min-height: 100%;
-  }
+  .screen-bg-town { background: linear-gradient(180deg, #a8d8f8 0%, #88c070 30%, #58a050 100%); min-height: 100%; }
   .screen-bg-forest {
     background: 
       repeating-linear-gradient(90deg, rgba(48,104,48,0.15) 0px, transparent 16px, transparent 32px),
       linear-gradient(180deg, #58a050 0%, #306830 60%, #204020 100%);
     min-height: 100%;
   }
-  .screen-bg-gym {
-    background: linear-gradient(180deg, #f8d8a8 0%, #d8a868 40%, #b88848 100%);
-    min-height: 100%;
-  }
-  .screen-bg-lab {
-    background: linear-gradient(180deg, #c8d8e8 0%, #98a8b8 50%, #687888 100%);
-    min-height: 100%;
-  }
+  .screen-bg-gym { background: linear-gradient(180deg, #f8d8a8 0%, #d8a868 40%, #b88848 100%); min-height: 100%; }
+  .screen-bg-lab { background: linear-gradient(180deg, #c8d8e8 0%, #98a8b8 50%, #687888 100%); min-height: 100%; }
 
   /* ===== S7: WILD GRASS MISSION GRID ===== */
   .wild-area-header {
@@ -734,18 +667,9 @@
     text-align: center;
     border-bottom: 3px solid var(--gbc-dark);
   }
-  .wild-area-header .area-name {
-    color: var(--gold-primary);
-    font-weight: bold;
-    font-size: 15px;
-  }
+  .wild-area-header .area-name { color: var(--gold-primary); font-weight: bold; font-size: 15px; }
 
-  .grass-field {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    padding: 10px;
-  }
+  .grass-field { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 10px; }
 
   .wild-tile {
     background: var(--gbc-lightest);
@@ -759,41 +683,24 @@
     overflow: hidden;
     transition: transform 0.1s;
   }
+  .wild-tile:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 rgba(0,0,0,0.3); }
 
-  .wild-tile:active {
-    transform: translate(1px, 1px);
-    box-shadow: 1px 1px 0 rgba(0,0,0,0.3);
-  }
-
-  /* Grass animation inside tile */
   .wild-tile::before {
     content: '';
     position: absolute;
     bottom: 0; left: 0; right: 0;
     height: 16px;
-    background: repeating-linear-gradient(90deg,
-      var(--gbc-light) 0px, var(--gbc-light) 6px,
-      var(--gbc-dark) 6px, var(--gbc-dark) 8px);
+    background: repeating-linear-gradient(90deg, var(--gbc-light) 0px, var(--gbc-light) 6px, var(--gbc-dark) 6px, var(--gbc-dark) 8px);
     animation: tile-grass 1.5s steps(2) infinite;
     opacity: 0.6;
   }
+  @keyframes tile-grass { 0% { transform: translateX(0); } 100% { transform: translateX(8px); } }
 
-  @keyframes tile-grass {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(8px); }
-  }
-
-  .wild-tile.acquired {
-    background: var(--gold-glow);
-    border-color: var(--gold-dark);
-  }
+  .wild-tile.acquired { background: var(--gold-glow); border-color: var(--gold-dark); }
   .wild-tile.acquired::before {
-    background: repeating-linear-gradient(90deg,
-      var(--gold-primary) 0px, var(--gold-primary) 6px,
-      var(--gold-dark) 6px, var(--gold-dark) 8px);
+    background: repeating-linear-gradient(90deg, var(--gold-primary) 0px, var(--gold-primary) 6px, var(--gold-dark) 6px, var(--gold-dark) 8px);
   }
 
-  /* Pokeball sprite in tile */
   .tile-ball {
     width: 36px; height: 36px;
     margin: 0 auto 6px auto;
@@ -804,13 +711,8 @@
     position: relative;
     z-index: 1;
   }
-
-  .tile-ball.great {
-    background: radial-gradient(circle at 50% 55%, #fff 4px, #181818 4px, #181818 5px, var(--blue-water) 5px, var(--blue-water) 50%, #181818 50%, #181818 52%, #f8f8f8 52%);
-  }
-  .tile-ball.ultra {
-    background: radial-gradient(circle at 50% 55%, #fff 4px, #181818 4px, #181818 5px, var(--gold-primary) 5px, var(--gold-primary) 50%, #181818 50%, #181818 52%, #f8f8f8 52%);
-  }
+  .tile-ball.great { background: radial-gradient(circle at 50% 55%, #fff 4px, #181818 4px, #181818 5px, var(--blue-water) 5px, var(--blue-water) 50%, #181818 50%, #181818 52%, #f8f8f8 52%); }
+  .tile-ball.ultra { background: radial-gradient(circle at 50% 55%, #fff 4px, #181818 4px, #181818 5px, var(--gold-primary) 5px, var(--gold-primary) 50%, #181818 50%, #181818 52%, #f8f8f8 52%); }
 
   @keyframes wild-shake {
     0%, 80%, 100% { transform: rotate(0deg); }
@@ -819,413 +721,159 @@
     95% { transform: rotate(-5deg); }
   }
 
-  .tile-title {
-    font-family: var(--font-game);
-    font-size: 13px;
-    font-weight: bold;
-    color: var(--gbc-darkest);
-    position: relative;
-    z-index: 1;
+  /* POKEBALL THROW ANIMATION IN MODAL */
+  .tile-ball.throwing {
+    animation: ball-throw-anim 1.2s ease-in-out forwards !important;
   }
 
-  .tile-exp {
-    font-family: var(--font-game);
-    font-size: 11px;
-    color: var(--gbc-dark);
-    font-weight: bold;
-    position: relative;
-    z-index: 1;
+  @keyframes ball-throw-anim {
+    0% { transform: scale(1) rotate(0deg); }
+    20% { transform: scale(0.9) rotate(-20deg); }
+    40% { transform: scale(1.1) rotate(20deg); }
+    60% { transform: translateY(-30px) scale(1.3) rotate(360deg); }
+    80% { transform: translateY(0) scale(1.1) rotate(720deg); box-shadow: 0 0 20px var(--gold-primary); }
+    100% { transform: scale(1.4) rotate(720deg); filter: brightness(1.5); }
   }
 
+  .tile-title { font-family: var(--font-game); font-size: 13px; font-weight: bold; color: var(--gbc-darkest); position: relative; z-index: 1; }
+  .tile-exp { font-family: var(--font-game); font-size: 11px; color: var(--gbc-dark); font-weight: bold; position: relative; z-index: 1; }
   .tile-tag-get {
-    position: absolute;
-    top: 4px; right: 4px;
-    background: var(--gold-primary);
-    color: var(--gbc-darkest);
-    font-family: var(--font-pixel);
-    font-size: 7px;
-    padding: 2px 5px;
-    border: 1px solid var(--gold-dark);
-    border-radius: 2px;
-    z-index: 2;
+    position: absolute; top: 4px; right: 4px;
+    background: var(--gold-primary); color: var(--gbc-darkest);
+    font-family: var(--font-pixel); font-size: 7px;
+    padding: 2px 5px; border: 1px solid var(--gold-dark); border-radius: 2px; z-index: 2;
   }
 
-  /* ===== S9: BAG / INVENTORY ===== */
-  .bag-item {
-    background: var(--menu-bg);
-    border: 3px solid var(--menu-border);
-    border-radius: 4px;
-    box-shadow: 2px 2px 0 var(--menu-shadow);
-    margin: 0 8px 8px 8px;
-    padding: 10px 12px;
-    font-family: var(--font-game);
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  /* ===== BAG & RANKING ===== */
+  .bag-item, .rank-entry {
+    background: var(--menu-bg); border: 3px solid var(--menu-border);
+    border-radius: 4px; box-shadow: 2px 2px 0 var(--menu-shadow);
+    margin: 0 8px 8px 8px; padding: 10px 12px;
+    font-family: var(--font-game); display: flex; align-items: center; gap: 10px;
   }
-
   .bag-item-ball {
     width: 28px; height: 28px;
     background: radial-gradient(circle at 50% 55%, #fff 3px, #181818 3px, #181818 4px, var(--red-pokeball) 4px, var(--red-pokeball) 50%, #181818 50%, #181818 52%, #f8f8f8 52%);
-    border-radius: 50%;
-    border: 2px solid var(--gbc-darkest);
-    flex-shrink: 0;
+    border-radius: 50%; border: 2px solid var(--gbc-darkest); flex-shrink: 0;
   }
-
-  .bag-item-info {
-    flex: 1;
-  }
-
-  .bag-item-title {
-    font-size: 13px;
-    font-weight: bold;
-    color: var(--gbc-darkest);
-  }
-
-  .bag-item-detail {
-    font-size: 11px;
-    color: var(--gbc-dark);
-    margin-top: 2px;
-  }
-
-  .bag-item-status {
-    font-family: var(--font-pixel);
-    font-size: 7px;
-    padding: 3px 6px;
-    border-radius: 2px;
-    border: 1px solid;
-    flex-shrink: 0;
-  }
+  .bag-item-info, .rank-info { flex: 1; }
+  .bag-item-title, .rank-team-name { font-size: 13px; font-weight: bold; color: var(--gbc-darkest); }
+  .bag-item-detail, .rank-members { font-size: 11px; color: var(--gbc-dark); margin-top: 2px; }
+  .bag-item-status { font-family: var(--font-pixel); font-size: 7px; padding: 3px 6px; border-radius: 2px; border: 1px solid; flex-shrink: 0; }
   .status-clear { background: var(--gbc-light); border-color: var(--gbc-dark); color: var(--gbc-darkest); }
   .status-fail { background: #f88888; border-color: var(--red-dark); color: #fff; }
   .status-pending { background: var(--gold-primary); border-color: var(--gold-dark); color: var(--gbc-darkest); }
 
-  /* ===== S10: LEADERBOARD ===== */
-  .rank-entry {
-    background: var(--menu-bg);
-    border: 3px solid var(--menu-border);
-    border-radius: 4px;
-    box-shadow: 2px 2px 0 var(--menu-shadow);
-    margin: 0 8px 8px 8px;
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: var(--font-game);
-  }
-
-  .rank-entry.champion {
-    border-color: var(--gold-dark);
-    background: var(--gold-glow);
-    box-shadow: 2px 2px 0 var(--gold-dark), 0 0 12px rgba(248,208,48,0.3);
-  }
-
+  .rank-entry.champion { border-color: var(--gold-dark); background: var(--gold-glow); box-shadow: 2px 2px 0 var(--gold-dark), 0 0 12px rgba(248,208,48,0.3); }
   .rank-num {
-    width: 32px; height: 32px;
-    background: var(--gbc-darkest);
-    color: var(--gold-primary);
-    font-family: var(--font-pixel);
-    font-size: 11px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid var(--gold-dark);
-    flex-shrink: 0;
+    width: 32px; height: 32px; background: var(--gbc-darkest); color: var(--gold-primary);
+    font-family: var(--font-pixel); font-size: 11px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center; border: 2px solid var(--gold-dark); flex-shrink: 0;
   }
+  .rank-points { font-family: var(--font-pixel); font-size: 10px; color: var(--gold-dark); font-weight: bold; flex-shrink: 0; }
 
-  .rank-info {
-    flex: 1;
-  }
-  .rank-team-name {
-    font-size: 14px;
-    font-weight: bold;
-    color: var(--gbc-darkest);
-  }
-  .rank-members {
-    font-size: 11px;
-    color: var(--gbc-dark);
-    margin-top: 2px;
-  }
-  .rank-points {
-    font-family: var(--font-pixel);
-    font-size: 10px;
-    color: var(--gold-dark);
-    font-weight: bold;
-    flex-shrink: 0;
-  }
-
-  /* ===== S11: ADMIN DASHBOARD ===== */
-  .admin-tab-bar {
-    display: flex;
-    gap: 4px;
-    padding: 8px 8px 0 8px;
-    flex-wrap: wrap;
-  }
-
+  /* ===== ADMIN PANEL ===== */
+  .admin-tab-bar { display: flex; gap: 4px; padding: 8px 8px 0 8px; flex-wrap: wrap; }
   .admin-tab-btn {
-    font-family: var(--font-game);
-    font-size: 12px;
-    font-weight: bold;
-    padding: 6px 10px;
-    background: var(--gbc-light);
-    border: 2px solid var(--gbc-darkest);
-    border-bottom: none;
-    border-radius: 4px 4px 0 0;
-    cursor: pointer;
-    color: var(--gbc-darkest);
+    font-family: var(--font-game); font-size: 12px; font-weight: bold;
+    padding: 6px 10px; background: var(--gbc-light); border: 2px solid var(--gbc-darkest);
+    border-bottom: none; border-radius: 4px 4px 0 0; cursor: pointer; color: var(--gbc-darkest);
   }
-  .admin-tab-btn.active {
-    background: var(--gold-primary);
-    color: var(--gbc-darkest);
-    border-color: var(--gold-dark);
-  }
+  .admin-tab-btn.active { background: var(--gold-primary); color: var(--gbc-darkest); border-color: var(--gold-dark); }
+  .admin-panel { margin: 0 8px 8px 8px; background: var(--menu-bg); border: 3px solid var(--menu-border); border-radius: 0 4px 4px 4px; padding: 10px; box-shadow: 2px 2px 0 var(--menu-shadow); }
 
-  .admin-panel {
-    margin: 0 8px 8px 8px;
-    background: var(--menu-bg);
-    border: 3px solid var(--menu-border);
-    border-radius: 0 4px 4px 4px;
-    padding: 10px;
-    box-shadow: 2px 2px 0 var(--menu-shadow);
-  }
-
-  .admin-pending-card {
-    background: var(--gbc-lightest);
-    border: 2px solid var(--gbc-dark);
-    border-radius: 4px;
-    padding: 8px 10px;
-    margin-bottom: 8px;
-    font-family: var(--font-game);
-  }
-
-  .admin-pending-title {
-    font-size: 13px;
-    font-weight: bold;
-    color: var(--gbc-darkest);
-  }
-  .admin-pending-detail {
-    font-size: 11px;
-    color: var(--gbc-dark);
-    margin-top: 4px;
-  }
-  .admin-btn-row {
-    display: flex;
-    gap: 6px;
-    margin-top: 8px;
-  }
+  .admin-pending-card { background: var(--gbc-lightest); border: 2px solid var(--gbc-dark); border-radius: 4px; padding: 8px 10px; margin-bottom: 8px; font-family: var(--font-game); }
+  .admin-pending-title { font-size: 13px; font-weight: bold; color: var(--gbc-darkest); }
+  .admin-pending-detail { font-size: 11px; color: var(--gbc-dark); margin-top: 4px; }
+  .admin-btn-row { display: flex; gap: 6px; margin-top: 8px; }
   .admin-btn-sm {
-    font-family: var(--font-game);
-    font-size: 12px;
-    font-weight: bold;
-    padding: 6px 12px;
-    border: 2px solid var(--gbc-darkest);
-    border-radius: 3px;
-    cursor: pointer;
-    box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
-    flex: 1;
-    text-align: center;
+    font-family: var(--font-game); font-size: 12px; font-weight: bold; padding: 6px 12px;
+    border: 2px solid var(--gbc-darkest); border-radius: 3px; cursor: pointer;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.3); flex: 1; text-align: center;
   }
-  .admin-btn-sm:active {
-    transform: translate(1px, 1px);
-    box-shadow: 1px 1px 0 rgba(0,0,0,0.3);
-  }
+  .admin-btn-sm:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 rgba(0,0,0,0.3); }
   .admin-btn-sm--approve { background: var(--gbc-light); color: var(--gbc-darkest); }
   .admin-btn-sm--reject { background: #f88888; color: #fff; }
 
-  /* ===== MODAL OVERLAY ===== */
+  /* ===== MODAL OVERLAY & GLOBAL LOADING ===== */
   .modal-overlay {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(8, 24, 32, 0.85);
-    z-index: 30;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 16px;
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(8, 24, 32, 0.85); z-index: 30;
+    display: flex; justify-content: center; align-items: center; padding: 16px;
   }
-
   .modal-box {
-    background: var(--menu-bg);
-    border: 4px solid var(--menu-border);
-    border-radius: 6px;
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
-    width: 100%;
-    max-width: 340px;
-    max-height: 80%;
-    overflow-y: auto;
-    padding: 14px;
-    animation: modal-pop 0.2s ease-out;
+    background: var(--menu-bg); border: 4px solid var(--menu-border);
+    border-radius: 6px; box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    width: 100%; max-width: 340px; max-height: 85%; overflow-y: auto;
+    padding: 14px; animation: modal-pop 0.2s ease-out;
   }
+  @keyframes modal-pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-  @keyframes modal-pop {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+  /* GLOBAL LOADING SPINNER MODAL */
+  #global-loading-modal {
+    z-index: 9999 !important;
+    background: rgba(8, 24, 32, 0.9) !important;
   }
+  .loading-pokeball-spinner {
+    width: 60px; height: 60px;
+    margin: 0 auto 12px auto;
+    background: radial-gradient(circle at 50% 55%, #fff 6px, #181818 6px, #181818 8px, var(--red-pokeball) 8px, var(--red-pokeball) 50%, #181818 50%, #181818 53%, #f8f8f8 53%);
+    border-radius: 50%;
+    border: 3px solid #181818;
+    animation: big-ball-spin 1s linear infinite;
+    box-shadow: 0 0 20px var(--gold-primary);
+  }
+  @keyframes big-ball-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-  /* ===== BOTTOM NAVIGATION (D-PAD STYLE) ===== */
+  /* ===== NAVIGATION ===== */
   .gbc-nav {
-    background: rgba(8,24,32,0.95);
-    border-top: 3px solid var(--gbc-dark);
-    display: flex;
-    justify-content: space-around;
-    padding: 4px 0;
-    z-index: 10;
+    background: rgba(8,24,32,0.95); border-top: 3px solid var(--gbc-dark);
+    display: flex; justify-content: space-around; padding: 4px 0; z-index: 10;
   }
-
   .nav-item {
-    background: none;
-    border: none;
-    color: var(--gbc-light);
-    font-family: var(--font-game);
-    font-size: 11px;
-    font-weight: bold;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    padding: 4px 10px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: color 0.1s;
+    background: none; border: none; color: var(--gbc-light);
+    font-family: var(--font-game); font-size: 11px; font-weight: bold;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 4px 10px; cursor: pointer; border-radius: 4px; transition: color 0.1s;
   }
-  .nav-item .nav-icon {
-    font-size: 18px;
-  }
-  .nav-item.active {
-    color: var(--gold-primary);
-    background: rgba(248,208,48,0.15);
-  }
+  .nav-item .nav-icon { font-size: 18px; }
+  .nav-item.active { color: var(--gold-primary); background: rgba(248,208,48,0.15); }
 
-  /* ===== D-PAD & BUTTONS DECORATION (bottom of shell) ===== */
-  .gbc-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 16px 4px 16px;
-  }
+  /* GBC CONTROLS DECORATION */
+  .gbc-controls { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px 4px 16px; }
+  .dpad { width: 56px; height: 56px; position: relative; }
+  .dpad-h, .dpad-v { position: absolute; background: #282828; border-radius: 3px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.5); }
+  .dpad-h { width: 56px; height: 18px; top: 19px; left: 0; }
+  .dpad-v { width: 18px; height: 56px; top: 0; left: 19px; }
+  .dpad-center { position: absolute; width: 14px; height: 14px; background: #202020; border-radius: 50%; top: 21px; left: 21px; }
 
-  .dpad {
-    width: 56px; height: 56px;
-    position: relative;
-  }
-  .dpad-h, .dpad-v {
-    position: absolute;
-    background: #282828;
-    border-radius: 3px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.5);
-  }
-  .dpad-h {
-    width: 56px; height: 18px;
-    top: 19px; left: 0;
-  }
-  .dpad-v {
-    width: 18px; height: 56px;
-    top: 0; left: 19px;
-  }
-  .dpad-center {
-    position: absolute;
-    width: 14px; height: 14px;
-    background: #202020;
-    border-radius: 50%;
-    top: 21px; left: 21px;
-  }
-
-  .ab-buttons {
-    display: flex;
-    gap: 10px;
-    transform: rotate(-15deg);
-  }
+  .ab-buttons { display: flex; gap: 10px; transform: rotate(-15deg); }
   .btn-circle {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    border: 2px solid #202020;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-pixel);
-    font-size: 8px;
-    color: #888;
+    width: 32px; height: 32px; border-radius: 50%; border: 2px solid #202020;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-pixel); font-size: 8px; color: #888;
     box-shadow: 0 3px 6px rgba(0,0,0,0.5), inset 0 -2px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
   }
-  .btn-a { background: #a02020; color: #e8b0b0; }
-  .btn-b { background: #a02020; color: #e8b0b0; }
+  .btn-a, .btn-b { background: #a02020; color: #e8b0b0; }
 
-  /* ===== UTILITIES ===== */
   .hidden { display: none !important; }
   .mt-6 { margin-top: 6px; }
   .mt-8 { margin-top: 8px; }
-  .mt-12 { margin-top: 12px; }
   .text-center { text-align: center; }
-  .px-8 { padding-left: 8px; padding-right: 8px; }
 
-  /* ===== ENCOUNTER ANIMATION ===== */
-  .encounter-flash {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    z-index: 40;
-    pointer-events: none;
-  }
-  .encounter-flash.active {
-    animation: encounter-stripes 0.8s steps(1);
-  }
-
-  @keyframes encounter-stripes {
-    0% { background: transparent; }
-    5% { background: var(--gbc-darkest); }
-    10% { background: transparent; }
-    15% { background: var(--gbc-darkest); }
-    20% { background: transparent; }
-    25% { background: var(--gbc-darkest); }
-    30% { background: transparent; }
-    35% { background: var(--gbc-darkest); }
-    40% { background: transparent; }
-    50% { background: var(--gbc-darkest); }
-    100% { background: transparent; }
-  }
-
-  /* ===== LOADING DOTS ===== */
-  .loading-dots::after {
-    content: '';
-    animation: loading-dots 1s steps(3) infinite;
-  }
-  @keyframes loading-dots {
-    0% { content: '.'; }
-    33% { content: '..'; }
-    66% { content: '...'; }
-  }
-
-  /* ===== RESPONSIVE ===== */
-  @media (max-height: 640px) {
-    .gbc-controls { display: none; }
-    .gbc-shell { border-radius: 12px; padding: 8px; max-height: 98vh; }
-    .gbc-label { display: none; }
-  }
-
-  @media (max-width: 380px) {
-    .gbc-shell { padding: 6px; border-radius: 12px; }
-    .gbc-controls { display: none; }
-    .title-text { font-size: 13px; }
-  }
+  @media (max-height: 640px) { .gbc-controls { display: none; } .gbc-shell { border-radius: 12px; padding: 8px; max-height: 98vh; } .gbc-label { display: none; } }
+  @media (max-width: 380px) { .gbc-shell { padding: 6px; border-radius: 12px; } .gbc-controls { display: none; } .title-text { font-size: 13px; } }
   </style>
 </head>
 <body>
 
 <div class="gbc-shell">
-
-  <!-- GBC Label -->
   <div class="gbc-label">GAME BOY <span>COLOR</span> — POCKET FIELD LV.1</div>
 
-  <!-- LCD Bezel -->
   <div class="gbc-bezel">
-
-    <!-- LCD Screen -->
     <div class="gbc-screen" id="gbc-screen">
 
-      <!-- Screen Transition Overlay -->
       <div class="screen-transition" id="screen-transition"></div>
-      <!-- Encounter Flash -->
-      <div class="encounter-flash" id="encounter-flash"></div>
 
       <!-- HUD Bar -->
       <div class="hud-bar">
@@ -1234,17 +882,16 @@
           <span class="hud-title">POCKET FIELD</span>
         </div>
         <div class="hud-right">
-          <span class="hud-badge" id="hud-role-tag">TRAINER</span>
+          <span class="hud-badge" id="hud-role-tag">GUEST</span>
           <button class="sound-toggle" onclick="AudioFX.toggleSound()" title="사운드">♪</button>
+          <button class="logout-btn hidden" id="hud-logout-btn" onclick="AudioFX.playClick(); App.logout()" title="로그아웃">🚪OUT</button>
         </div>
       </div>
 
       <!-- Game Viewport -->
       <div class="game-viewport" id="game-viewport">
 
-        <!-- ============================================================
-             S1: TITLE SCREEN
-             ============================================================ -->
+        <!-- S1: TITLE SCREEN -->
         <section id="screen-s1" class="view-screen active">
           <div class="title-screen">
             <div class="title-pokeball">
@@ -1253,11 +900,9 @@
               <div class="ball-bottom"></div>
             </div>
 
-            <div class="title-text">
-              POCKET FIELD<br>ADVENTURE
-            </div>
+            <div class="title-text">POCKET FIELD<br>ADVENTURE</div>
             <div class="title-sub">2026 현장체험학습 미션 플랫폼</div>
-            <div class="title-version">Ver 1.0 — Gold Edition</div>
+            <div class="title-version">Ver 1.2 — Gold Edition</div>
 
             <div class="press-start">▼ SELECT YOUR MODE ▼</div>
 
@@ -1278,9 +923,7 @@
           </div>
         </section>
 
-        <!-- ============================================================
-             S2: LEADER LOGIN
-             ============================================================ -->
+        <!-- S2: LEADER LOGIN -->
         <section id="screen-s2" class="view-screen">
           <div class="screen-bg-town" style="padding: 10px 0;">
             <div class="gbc-dialog">
@@ -1307,6 +950,9 @@
                 <div class="btn-stack">
                   <button class="gbc-btn gbc-btn--gold" onclick="AudioFX.playClick(); App.handleLeaderLogin()">
                     ▶ 게임 접속!
+                  </button>
+                  <button class="gbc-btn gbc-btn--white" style="font-size:11px;" onclick="AudioFX.playClick(); App.openResetPasswordModal()">
+                    🔑 비밀번호를 잊어버리셨나요?
                   </button>
                   <button class="gbc-btn gbc-btn--white" onclick="AudioFX.playClick(); Router.navigate('s1')">
                     ◀ 뒤로가기
@@ -1335,9 +981,30 @@
           </div>
         </div>
 
-        <!-- ============================================================
-             S3: MEMBER LOGIN
-             ============================================================ -->
+        <!-- Password Reset Modal -->
+        <div id="modal-reset-pw" class="modal-overlay hidden">
+          <div class="modal-box">
+            <div class="gbc-menu-title">🔑 비밀번호 찾기 / 초기화</div>
+            <div style="padding: 10px;" class="form-stack">
+              <div class="field-label">▶ 본인 이름 선택</div>
+              <select id="modal-reset-member" class="gbc-select">
+                <option value="">-- 명단 선택 --</option>
+              </select>
+              <div class="field-label">▶ 관리자 코드 또는 팀장 코드</div>
+              <input type="password" id="modal-reset-code" class="gbc-input" placeholder="인증 코드 입력">
+              <div class="btn-stack">
+                <button class="gbc-btn gbc-btn--red" onclick="AudioFX.playClick(); App.handleResetPassword()">
+                  ⚡ 비밀번호 초기화 진행
+                </button>
+                <button class="gbc-btn gbc-btn--white" onclick="AudioFX.playClick(); App.closeResetPasswordModal()">
+                  취소
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- S3: MEMBER LOGIN -->
         <section id="screen-s3" class="view-screen">
           <div class="screen-bg-town" style="padding: 10px 0;">
             <div class="gbc-dialog">
@@ -1363,9 +1030,7 @@
           </div>
         </section>
 
-        <!-- ============================================================
-             S4: ADMIN LOGIN
-             ============================================================ -->
+        <!-- S4: ADMIN LOGIN -->
         <section id="screen-s4" class="view-screen">
           <div class="screen-bg-lab" style="padding: 10px 0;">
             <div class="gbc-dialog">
@@ -1391,25 +1056,23 @@
           </div>
         </section>
 
-        <!-- ============================================================
-             S6: TEAM BUILDING
-             ============================================================ -->
+        <!-- S6: TEAM BUILDING -->
         <section id="screen-s6" class="view-screen">
           <div class="screen-bg-gym" style="padding: 10px 0;">
             <div class="gbc-dialog">
               <div class="speaker">오박사</div>
-              훌륭해! 이제 동료 트레이너를 선택하여 팀을 결성하는거야!
+              팀장 트레이너님! 멋진 팀명을 정하고 함께할 팀원들을 선택해 팀을 창단하세요!
             </div>
 
             <div class="gbc-menu">
-              <div class="gbc-menu-title">🚩 트레이너 팀 결성소</div>
+              <div class="gbc-menu-title">🚩 트레이너 팀 결성소 (팀장 전용)</div>
               <div class="gbc-menu-body form-stack">
                 <div class="field-label">▶ 팀 이름</div>
-                <input type="text" id="s6-team-name" class="gbc-input" placeholder="예: 골드 트레이너 팀">
+                <input type="text" id="s6-team-name" class="gbc-input" placeholder="예: 피카츄 탐험대">
 
                 <div class="field-label">▶ 팀원 선택 (미배정 목록)</div>
                 <div id="s6-member-checklist" style="max-height: 130px; overflow-y: auto; background: var(--gbc-lightest); border: 2px solid var(--gbc-dark); border-radius: 3px; padding: 6px;">
-                  <div style="font-size: 12px; color: var(--gbc-dark);" class="loading-dots">명단 로딩 중</div>
+                  <div style="font-size: 12px; color: var(--gbc-dark);">명단 로딩 중...</div>
                 </div>
 
                 <div class="btn-stack">
@@ -1422,9 +1085,7 @@
           </div>
         </section>
 
-        <!-- ============================================================
-             S7: WILD MISSION GRASS FIELD
-             ============================================================ -->
+        <!-- S7: WILD MISSION GRASS FIELD -->
         <section id="screen-s7" class="view-screen">
           <div class="screen-bg-forest">
             <div class="wild-area-header">
@@ -1461,9 +1122,7 @@
           </div>
         </div>
 
-        <!-- ============================================================
-             S9: MY BAG (Inventory)
-             ============================================================ -->
+        <!-- S9: MY BAG -->
         <section id="screen-s9" class="view-screen">
           <div class="screen-bg-gym" style="padding: 10px 0; min-height: 100%;">
             <div class="gbc-menu" style="margin-bottom: 8px;">
@@ -1478,9 +1137,7 @@
           </div>
         </section>
 
-        <!-- ============================================================
-             S10: LEADERBOARD
-             ============================================================ -->
+        <!-- S10: LEADERBOARD -->
         <section id="screen-s10" class="view-screen">
           <div class="screen-bg-gym" style="padding: 10px 0; min-height: 100%;">
             <div class="gbc-menu" style="margin-bottom: 8px;">
@@ -1495,9 +1152,7 @@
           </div>
         </section>
 
-        <!-- ============================================================
-             S11: ADMIN DASHBOARD
-             ============================================================ -->
+        <!-- S11: ADMIN DASHBOARD -->
         <section id="screen-s11" class="view-screen">
           <div class="screen-bg-lab" style="padding: 10px 0; min-height: 100%;">
             <div class="gbc-menu" style="margin-bottom: 0;">
@@ -1505,10 +1160,10 @@
             </div>
 
             <div class="admin-tab-bar">
-              <button class="admin-tab-btn active" onclick="AudioFX.playClick(); App.showAdminTab('pending')">⚖판정</button>
-              <button class="admin-tab-btn" onclick="AudioFX.playClick(); App.showAdminTab('missions')">🎯미션</button>
-              <button class="admin-tab-btn" onclick="AudioFX.playClick(); App.showAdminTab('members')">👥명단</button>
-              <button class="admin-tab-btn" onclick="AudioFX.playClick(); App.showAdminTab('config')">⚙설정</button>
+              <button class="admin-tab-btn active" onclick="AudioFX.playClick(); App.showAdminTab('pending', this)">⚖판정</button>
+              <button class="admin-tab-btn" onclick="AudioFX.playClick(); App.showAdminTab('missions', this)">🎯미션</button>
+              <button class="admin-tab-btn" onclick="AudioFX.playClick(); App.showAdminTab('members', this)">👥명단</button>
+              <button class="admin-tab-btn" onclick="AudioFX.playClick(); App.showAdminTab('config', this)">⚙설정</button>
             </div>
 
             <!-- Tab: Pending -->
@@ -1519,12 +1174,43 @@
 
             <!-- Tab: Missions -->
             <div id="admin-tab-missions" class="admin-panel hidden">
-              <div style="font-family: var(--font-game); font-size: 13px; font-weight: bold; color: var(--gbc-darkest); margin-bottom: 8px;">🎯 미션 등록/수정</div>
+              <div style="font-family: var(--font-game); font-size: 13px; font-weight: bold; color: var(--gbc-darkest); margin-bottom: 8px;">🎯 미션 등록 / 수정 (구글 시트 저장)</div>
               <div class="form-stack">
-                <input type="text" id="adm-m-title" class="gbc-input" placeholder="미션 제목">
-                <textarea id="adm-m-desc" class="gbc-input" placeholder="상세 설명" rows="3" style="resize: vertical;"></textarea>
-                <input type="number" id="adm-m-points" class="gbc-input" placeholder="획득 EXP (예: 20)">
-                <button class="gbc-btn gbc-btn--gold mt-6" onclick="AudioFX.playClick(); App.handleAdminSaveMission()">미션 저장</button>
+                <input type="hidden" id="adm-m-id">
+                <div class="field-label">▶ 미션 제목</div>
+                <input type="text" id="adm-m-title" class="gbc-input" placeholder="예: 드레스코드 인증 미션">
+                
+                <div class="field-label">▶ 미션 상세 설명</div>
+                <textarea id="adm-m-desc" class="gbc-input" placeholder="미션 내용을 입력하세요" rows="2" style="resize: vertical;"></textarea>
+                
+                <div class="field-label">▶ 획득 EXP (점수)</div>
+                <input type="number" id="adm-m-points" class="gbc-input" placeholder="예: 20" value="20">
+                
+                <div class="field-label">▶ 획득 방식</div>
+                <select id="adm-m-acquire-type" class="gbc-select">
+                  <option value="gacha">랜덤 뽑기 (gacha)</option>
+                  <option value="roulette">야생의 룰렛 (roulette)</option>
+                  <option value="first_come">선착순 스피드 (first_come)</option>
+                </select>
+
+                <div class="field-label">▶ 볼 종류</div>
+                <select id="adm-m-ball-type" class="gbc-select">
+                  <option value="normal">🔴 몬스터볼 (Normal)</option>
+                  <option value="great">🔵 수퍼볼 (Great)</option>
+                  <option value="ultra">🟡 하이퍼볼 (Ultra)</option>
+                </select>
+
+                <div class="field-label">▶ 미션 세부 슬롯 (줄바꿈으로 구분)</div>
+                <textarea id="adm-m-slots" class="gbc-input" placeholder="슬롯1 내용&#10;슬롯2 내용&#10;슬롯3 내용" rows="3" style="resize: vertical;"></textarea>
+
+                <div class="btn-stack">
+                  <button class="gbc-btn gbc-btn--gold mt-6" onclick="AudioFX.playClick(); App.handleAdminSaveMission()">
+                    💾 미션 구글 시트 저장!
+                  </button>
+                  <button class="gbc-btn gbc-btn--white" style="font-size:11px;" onclick="AudioFX.playClick(); App.resetAdminMissionForm()">
+                    🔄 입력 폼 초기화
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1550,6 +1236,19 @@
         </section>
 
       </div><!-- /game-viewport -->
+
+      <!-- GLOBAL LOADING SPINNER MODAL -->
+      <div id="global-loading-modal" class="modal-overlay hidden">
+        <div class="modal-box text-center" style="max-width: 260px; padding: 20px 14px;">
+          <div class="loading-pokeball-spinner"></div>
+          <div style="font-family: var(--font-game); font-weight: bold; font-size: 14px; color: var(--gold-primary);">
+            구글 시트 동기화 중...
+          </div>
+          <div style="font-family: var(--font-game); font-size: 12px; color: var(--gbc-lightest); margin-top: 6px;">
+            잠시만 기다려 주세요! ⚡
+          </div>
+        </div>
+      </div>
 
       <!-- Bottom Navigation -->
       <div class="gbc-nav" id="main-nav">
@@ -1662,16 +1361,35 @@ const State = {
   teamId: localStorage.getItem('POCKET_TEAM_ID') || '',
   webAppUrl: GAS_WEB_APP_URL,
   currentMission: null,
-  currentScreen: 's1'
+  currentScreen: 's1',
+  loadingCount: 0
 };
 
-/* ===== API BRIDGE ===== */
+function showGlobalLoading() {
+  State.loadingCount++;
+  const modal = document.getElementById('global-loading-modal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function hideGlobalLoading() {
+  State.loadingCount = Math.max(0, State.loadingCount - 1);
+  if (State.loadingCount === 0) {
+    const modal = document.getElementById('global-loading-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+}
+
+/* ===== API BRIDGE WITH LOADING INDICATOR ===== */
 function apiCall(funcName, ...args) {
   return new Promise(async (resolve, reject) => {
+    showGlobalLoading();
+
+    const cleanup = () => hideGlobalLoading();
+
     if (typeof google !== 'undefined' && google.script && google.script.run) {
       google.script.run
-        .withSuccessHandler(res => resolve(res))
-        .withFailureHandler(err => reject(err))
+        .withSuccessHandler(res => { cleanup(); resolve(res); })
+        .withFailureHandler(err => { cleanup(); reject(err); })
         [funcName](...args);
       return;
     }
@@ -1691,6 +1409,7 @@ function apiCall(funcName, ...args) {
           })
         });
         const json = await res.json();
+        cleanup();
         resolve(json);
         return;
       } catch (err) {
@@ -1698,8 +1417,9 @@ function apiCall(funcName, ...args) {
       }
     }
 
-    // Local Preview Mock
+    // Local Preview Fallback
     setTimeout(() => {
+      cleanup();
       if (funcName === 'login') {
         resolve({ ok: true, data: { token: 'MOCK_TOKEN_123', role: args[0].role, memberName: '테스트 트레이너' } });
       } else if (funcName === 'getMissions') {
@@ -1707,10 +1427,9 @@ function apiCall(funcName, ...args) {
           ok: true,
           data: {
             missions: [
-              { mission_id: 'Q001', title: '드레스코드 미션', description: '레트로 교복 단체사진 인증! 친구들과 함께 멋진 포즈를 취해보자!', points: 20, acquire_type: 'gacha', ball_type: 'normal', status: 'open' },
-              { mission_id: 'Q002', title: '야생의 댄스 미션', description: '중앙 광장에서 단체 댄스를 추고 인증샷을 찍어라!', points: 30, acquire_type: 'roulette', ball_type: 'great', status: 'open' },
-              { mission_id: 'Q003', title: '보물찾기 미션', description: '숨겨진 QR코드를 찾아 스캔하면 특별한 보상이!', points: 50, acquire_type: 'gacha', ball_type: 'ultra', status: 'open' },
-              { mission_id: 'Q004', title: '팀 구호 외치기', description: '팀만의 독창적인 구호를 만들고 영상으로 인증!', points: 15, acquire_type: 'gacha', ball_type: 'normal', status: 'open' }
+              { mission_id: 'Q001', title: '드레스코드 미션 (뽑기)', description: '레트로 교복 단체사진 인증!', points: 20, acquire_type: 'gacha', ball_type: 'normal', status: 'open' },
+              { mission_id: 'Q002', title: '야생의 룰렛 미션', description: '중앙 광장에서 단체 댄스를 추어라!', points: 30, acquire_type: 'roulette', ball_type: 'great', status: 'open' },
+              { mission_id: 'Q003', title: '점심 보너스 스피드 미션 (선착순)', description: '오박사님과 단체 하트 셀카!', points: 50, acquire_type: 'first_come', ball_type: 'master', status: 'open' }
             ]
           }
         });
@@ -1720,8 +1439,7 @@ function apiCall(funcName, ...args) {
           data: {
             ranking: [
               { rank: 1, team_name: '피카츄 탐험대', emblem: 'ball_normal', total_points: 120, cleared_count: 5, members: ['김피카', '이파이리'] },
-              { rank: 2, team_name: '꼬북이 특공대', emblem: 'ball_great', total_points: 90, cleared_count: 3, members: ['박꼬북', '최잠만보'] },
-              { rank: 3, team_name: '이상해씨 모험단', emblem: 'ball_normal', total_points: 75, cleared_count: 2, members: ['이상해', '김씨앗'] }
+              { rank: 2, team_name: '꼬북이 특공대', emblem: 'ball_great', total_points: 90, cleared_count: 3, members: ['박꼬북'] }
             ],
             updatedAt: new Date().toISOString()
           }
@@ -1732,8 +1450,7 @@ function apiCall(funcName, ...args) {
           data: {
             teamName: '피카츄 탐험대',
             items: [
-              { log_id: 'L001', title: '드레스코드 미션', points: 20, slot_content: '교복 단체사진', result: 'success' },
-              { log_id: 'L002', title: '야생의 댄스 미션', points: 30, slot_content: '광장 댄스', result: 'pending' }
+              { log_id: 'L001', title: '드레스코드 미션', points: 20, slot_content: '교복 단체사진', result: 'success' }
             ]
           }
         });
@@ -1747,32 +1464,33 @@ function apiCall(funcName, ...args) {
 /* ===== SCREEN TRANSITION ROUTER ===== */
 const Router = {
   navigate(screenId, skipTransition = false) {
+    // 팀원 권한으로 팀 결성 화면 s6 접근 제한
+    if (screenId === 's6' && State.role === 'member') {
+      alert('⚠️ 팀 결성은 팀장만 가능합니다! 팀원으로 접속하셨다면 팀장의 안내를 받으세요.');
+      return;
+    }
+
     if (State.currentScreen === screenId) return;
 
     const transEl = document.getElementById('screen-transition');
 
     const doSwitch = () => {
-      // Hide all screens
       document.querySelectorAll('.view-screen').forEach(el => el.classList.remove('active'));
-      // Show target
       const target = document.getElementById(`screen-${screenId}`);
       if (target) target.classList.add('active');
-      // Scroll to top
+
       document.getElementById('game-viewport').scrollTop = 0;
 
-      // Update nav
       document.querySelectorAll('.nav-item').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.nav === screenId);
       });
 
-      // Show/hide nav bar based on screen
       const navEl = document.getElementById('main-nav');
       const loggedInScreens = ['s7', 's9', 's10', 's6'];
       navEl.style.display = loggedInScreens.includes(screenId) ? 'flex' : 'none';
 
       State.currentScreen = screenId;
 
-      // Trigger data load
       if (screenId === 's2') App.loadMemberList();
       if (screenId === 's6') App.loadUnassignedMembers();
       if (screenId === 's7') App.loadMissions();
@@ -1788,9 +1506,8 @@ const Router = {
       return;
     }
 
-    // Play GBC-style screen wipe transition
-    transEl.classList.remove('active', 'wipe');
-    void transEl.offsetWidth; // Force reflow
+    transEl.classList.remove('active');
+    void transEl.offsetWidth;
     transEl.classList.add('active');
 
     setTimeout(doSwitch, 250);
@@ -1798,16 +1515,17 @@ const Router = {
   }
 };
 
-/* ===== APP LOGIC ===== */
+/* ===== APP CONTROLLER ===== */
 const App = {
   init() {
     AudioFX.init();
-    // First click to unlock audio context
     document.addEventListener('click', () => {
       if (AudioFX.ctx && AudioFX.ctx.state === 'suspended') {
         AudioFX.ctx.resume();
       }
     }, { once: true });
+
+    this.updateHudUserTag();
 
     if (State.token) {
       if (State.role === 'admin') Router.navigate('s11', true);
@@ -1817,15 +1535,48 @@ const App = {
     }
   },
 
+  updateHudUserTag() {
+    const badge = document.getElementById('hud-role-tag');
+    const logoutBtn = document.getElementById('hud-logout-btn');
+    if (badge) {
+      const labels = { admin: 'ADMIN', leader: 'LEADER', member: 'MEMBER' };
+      badge.textContent = labels[State.role] || 'GUEST';
+    }
+    if (logoutBtn) {
+      if (State.token) logoutBtn.classList.remove('hidden');
+      else logoutBtn.classList.add('hidden');
+    }
+  },
+
+  logout() {
+    if (!confirm('정말 로그아웃 하시겠습니까?')) return;
+    State.token = '';
+    State.role = 'guest';
+    State.memberId = '';
+    State.memberName = '';
+    State.teamId = '';
+    localStorage.removeItem('POCKET_TOKEN');
+    localStorage.removeItem('POCKET_ROLE');
+    localStorage.removeItem('POCKET_MEMBER_ID');
+    localStorage.removeItem('POCKET_MEMBER_NAME');
+    localStorage.removeItem('POCKET_TEAM_ID');
+    this.updateHudUserTag();
+    alert('로그아웃 되었습니다.');
+    Router.navigate('s1');
+  },
+
   async loadMemberList() {
     try {
       const res = await apiCall('getMemberList', State.token);
       if (res.ok && res.data) {
         const select = document.getElementById('s2-member-select');
-        select.innerHTML = '<option value="">-- 본인 이름을 선택하세요 --</option>';
+        const resetSelect = document.getElementById('modal-reset-member');
+        let optionsHtml = '<option value="">-- 본인 이름을 선택하세요 --</option>';
         (res.data.all || []).forEach(m => {
-          select.innerHTML += `<option value="${m.member_id}">${m.name} (${m.class_info || '학생'})</option>`;
+          optionsHtml += `<option value="${m.member_id}">${m.name} (${m.class_info || '학생'})</option>`;
         });
+        if (select) select.innerHTML = optionsHtml;
+        if (resetSelect) resetSelect.innerHTML = optionsHtml;
       }
     } catch (e) {}
   },
@@ -1844,6 +1595,7 @@ const App = {
       } else {
         this.saveSession(res.data);
         AudioFX.playSuccess();
+        alert(`반갑습니다, ${res.data.memberName || '팀장'} 트레이너님!`);
         Router.navigate('s7');
       }
     } else alert(res.error ? res.error.message : '로그인 실패');
@@ -1864,6 +1616,29 @@ const App = {
       AudioFX.playSuccess();
       Router.navigate('s7');
     } else alert(res.error ? res.error.message : '비밀번호 설정 실패');
+  },
+
+  openResetPasswordModal() {
+    this.loadMemberList();
+    document.getElementById('modal-reset-pw').classList.remove('hidden');
+  },
+
+  closeResetPasswordModal() {
+    document.getElementById('modal-reset-pw').classList.add('hidden');
+  },
+
+  async handleResetPassword() {
+    const memberId = document.getElementById('modal-reset-member').value;
+    const code = document.getElementById('modal-reset-code').value.trim();
+
+    if (!memberId || !code) return alert('이름과 인증 코드를 입력하세요.');
+
+    const res = await apiCall('resetLeaderPassword', { memberId, adminCode: code, leaderCode: code });
+    if (res.ok) {
+      AudioFX.playSuccess();
+      alert(res.data.message);
+      this.closeResetPasswordModal();
+    } else alert(res.error ? res.error.message : '초기화 실패');
   },
 
   async handleMemberLogin() {
@@ -1893,19 +1668,28 @@ const App = {
   saveSession(data) {
     State.token = data.token;
     State.role = data.role;
+    if (data.memberId) State.memberId = data.memberId;
+    if (data.memberName) State.memberName = data.memberName;
+    if (data.teamId) State.teamId = data.teamId;
+
     localStorage.setItem('POCKET_TOKEN', data.token);
     localStorage.setItem('POCKET_ROLE', data.role);
+    if (data.memberId) localStorage.setItem('POCKET_MEMBER_ID', data.memberId);
     if (data.memberName) localStorage.setItem('POCKET_MEMBER_NAME', data.memberName);
-    const badge = document.getElementById('hud-role-tag');
-    if (badge) {
-      const labels = { admin: 'ADMIN', leader: 'LEADER', member: 'MEMBER' };
-      badge.textContent = labels[data.role] || 'TRAINER';
-    }
+    if (data.teamId) localStorage.setItem('POCKET_TEAM_ID', data.teamId);
+
+    this.updateHudUserTag();
   },
 
   async loadUnassignedMembers() {
+    if (State.role === 'member') {
+      alert('⚠️ 팀 결성은 팀장만 가능합니다!');
+      Router.navigate('s7');
+      return;
+    }
+
     const checklist = document.getElementById('s6-member-checklist');
-    checklist.innerHTML = '<div class="loading-dots" style="font-size:12px; color:var(--gbc-dark);">명단 로딩 중</div>';
+    checklist.innerHTML = '<div style="font-size:12px; color:var(--gbc-dark);">명단 로딩 중...</div>';
     try {
       const res = await apiCall('getMemberList', State.token);
       if (res.ok && res.data) {
@@ -1928,6 +1712,10 @@ const App = {
   },
 
   async handleCreateTeam() {
+    if (State.role === 'member') {
+      return alert('⚠️ 팀 결성은 팀장만 가능합니다!');
+    }
+
     const teamName = document.getElementById('s6-team-name').value.trim();
     const checkedBoxes = document.querySelectorAll('input[name="team-member"]:checked');
     const memberIds = Array.from(checkedBoxes).map(cb => cb.value);
@@ -1944,7 +1732,7 @@ const App = {
 
   async loadMissions() {
     const grid = document.getElementById('s7-mission-grid');
-    grid.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:24px; color:var(--gbc-lightest); font-family:var(--font-game);"><span class="loading-dots">🌿 풀숲 미션 탐색 중</span></div>';
+    grid.innerHTML = '<div style="grid-column:span 2; text-align:center; padding:24px; color:var(--gbc-lightest); font-family:var(--font-game);">🌿 풀숲 미션 탐색 중...</div>';
     try {
       const res = await apiCall('getMissions', State.token);
       if (res.ok && res.data) {
@@ -1958,7 +1746,7 @@ const App = {
           const isAcquired = !!m.my_acquired;
           const ballClass = m.ball_type === 'great' ? 'great' : (m.ball_type === 'ultra' ? 'ultra' : '');
           grid.innerHTML += `
-            <div class="wild-tile ${isAcquired ? 'acquired' : ''}" onclick="AudioFX.playClick(); App.openMissionModal('${m.mission_id}')" style="animation-delay: ${idx * 0.1}s;">
+            <div class="wild-tile ${isAcquired ? 'acquired' : ''}" onclick="AudioFX.playClick(); App.openMissionModal('${m.mission_id}')">
               ${isAcquired ? '<div class="tile-tag-get">GET!</div>' : ''}
               <div class="tile-ball ${ballClass}"></div>
               <div class="tile-title">${m.title}</div>
@@ -1977,38 +1765,56 @@ const App = {
     if (!target) return;
     State.currentMission = target;
 
+    const ballIcon = document.getElementById('md-ball-icon');
+    if (ballIcon) {
+      ballIcon.className = `tile-ball ${target.ball_type === 'great' ? 'great' : (target.ball_type === 'ultra' ? 'ultra' : '')}`;
+    }
+
     document.getElementById('md-title').textContent = target.title;
     document.getElementById('md-points').textContent = `🎁 성공 시 +${target.points} EXP`;
     document.getElementById('md-desc').textContent = target.description;
-
-    // Encounter flash effect
-    const flash = document.getElementById('encounter-flash');
-    flash.classList.remove('active');
-    void flash.offsetWidth;
-    flash.classList.add('active');
-    setTimeout(() => flash.classList.remove('active'), 800);
 
     document.getElementById('modal-mission-detail').classList.remove('hidden');
   },
 
   closeMissionModal() {
+    const ballIcon = document.getElementById('md-ball-icon');
+    if (ballIcon) ballIcon.classList.remove('throwing');
     document.getElementById('modal-mission-detail').classList.add('hidden');
   },
 
   async executeAcquireMission() {
     if (!State.currentMission) return;
-    this.closeMissionModal();
-    const res = await apiCall('acquireMission', State.token, { missionId: State.currentMission.mission_id });
-    if (res.ok) {
-      AudioFX.playSuccess();
-      alert(`🎉 포켓볼 획득 성공!\n\n획득 미션: [${res.data.slotContent}]`);
-      App.loadMissions();
-    } else alert(res.error ? res.error.message : '획득 실패');
+    if (State.role !== 'leader' && State.role !== 'admin') {
+      return alert('⚠️ 미션 포켓볼 던지기(획득)는 팀장만 가능합니다!');
+    }
+
+    const ballIcon = document.getElementById('md-ball-icon');
+    const actionBtn = document.getElementById('btn-acquire-action');
+    if (ballIcon) ballIcon.classList.add('throwing');
+    if (actionBtn) actionBtn.disabled = true;
+
+    AudioFX.playTone(300, 'sine', 0.2, 0);
+    AudioFX.playTone(500, 'square', 0.2, 0.2);
+    AudioFX.playTone(800, 'square', 0.3, 0.5);
+
+    setTimeout(async () => {
+      const res = await apiCall('acquireMission', State.token, { missionId: State.currentMission.mission_id });
+      if (actionBtn) actionBtn.disabled = false;
+      if (ballIcon) ballIcon.classList.remove('throwing');
+      this.closeMissionModal();
+
+      if (res.ok) {
+        AudioFX.playSuccess();
+        alert(`🎉 포켓볼 획득 성공!\n\n획득 미션: [${res.data.slotContent}]`);
+        App.loadMissions();
+      } else alert(res.error ? res.error.message : '획득 실패');
+    }, 1200);
   },
 
   async loadMyBag() {
     const list = document.getElementById('s9-bag-list');
-    list.innerHTML = '<div class="bag-item"><span class="loading-dots" style="font-family:var(--font-game); color:var(--gbc-dark);">가방 확인 중</span></div>';
+    list.innerHTML = '<div class="bag-item" style="justify-content:center;">가방 확인 중...</div>';
     try {
       const res = await apiCall('getMyBag', State.token);
       if (res.ok && res.data) {
@@ -2039,7 +1845,7 @@ const App = {
 
   async loadRanking() {
     const list = document.getElementById('s10-ranking-list');
-    list.innerHTML = '<div class="rank-entry" style="justify-content:center;"><span class="loading-dots" style="font-family:var(--font-game); color:var(--gbc-dark);">순위 로딩 중</span></div>';
+    list.innerHTML = '<div class="rank-entry" style="justify-content:center;">순위 로딩 중...</div>';
     try {
       const res = await apiCall('getRanking', State.token);
       if (res.ok && res.data) {
@@ -2068,12 +1874,11 @@ const App = {
     } catch (e) {}
   },
 
-  showAdminTab(tabName) {
+  showAdminTab(tabName, btnEl) {
     document.querySelectorAll('.admin-panel').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById(`admin-tab-${tabName}`).classList.remove('hidden');
-    // Find the clicked button and activate it
-    event.target.classList.add('active');
+    if (btnEl) btnEl.classList.add('active');
   },
 
   async loadAdminDashboard() {
@@ -2112,21 +1917,56 @@ const App = {
     }
   },
 
+  resetAdminMissionForm() {
+    document.getElementById('adm-m-id').value = '';
+    document.getElementById('adm-m-title').value = '';
+    document.getElementById('adm-m-desc').value = '';
+    document.getElementById('adm-m-points').value = '20';
+    document.getElementById('adm-m-slots').value = '';
+  },
+
   async handleAdminSaveMission() {
-    // Placeholder for mission save
-    alert('미션 저장 기능 (구현 예정)');
+    const missionId = document.getElementById('adm-m-id').value.trim();
+    const title = document.getElementById('adm-m-title').value.trim();
+    const description = document.getElementById('adm-m-desc').value.trim();
+    const points = document.getElementById('adm-m-points').value.trim();
+    const acquire_type = document.getElementById('adm-m-acquire-type').value;
+    const ball_type = document.getElementById('adm-m-ball-type').value;
+    const slotsText = document.getElementById('adm-m-slots').value.trim();
+
+    if (!title) return alert('미션 제목을 입력하세요!');
+
+    const slots = slotsText ? slotsText.split('\n').map(s => s.trim()).filter(Boolean) : [];
+
+    const res = await apiCall('adminUpsertMission', State.token, {
+      mission_id: missionId,
+      title,
+      description,
+      points,
+      acquire_type,
+      ball_type,
+      slots,
+      status: 'open'
+    });
+
+    if (res.ok) {
+      AudioFX.playSuccess();
+      alert(res.data.message);
+      this.resetAdminMissionForm();
+      this.loadMissions();
+    } else alert(res.error ? res.error.message : '미션 저장 실패');
   },
 
   async handleAdminAddMembers() {
     const raw = document.getElementById('adm-mem-text').value.trim();
-    if (!raw) return;
+    if (!raw) return alert('추가할 학생 이름을 입력하세요.');
     const names = raw.split('\n').map(n => ({ name: n.trim() })).filter(n => n.name);
     const res = await apiCall('adminUpsertMembers', State.token, names);
     if (res.ok) {
       AudioFX.playSuccess();
       alert(res.data.message);
       document.getElementById('adm-mem-text').value = '';
-    }
+    } else alert(res.error ? res.error.message : '명단 추가 실패');
   },
 
   async handleAdminSetPhase(phase) {

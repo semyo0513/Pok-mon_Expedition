@@ -180,6 +180,7 @@ function routeAction(action, token, payload) {
     case 'adminAdjustPoints': return adminAdjustPoints(token, payload);
     case 'adminUpdateConfig': return adminUpdateConfig(token, payload);
     case 'adminPurgeData': return adminPurgeData(token);
+    case 'resetLeaderPassword': return resetLeaderPassword(payload);
     default:
       return { ok: false, error: { message: '알 수 없는 요청 액션입니다: ' + action } };
   }
@@ -370,10 +371,18 @@ function getMemberList(token) {
 
 function createTeam(token, payload) {
   var lock = LockService.getScriptLock();
+  var hasLock = false;
   try {
-    if (!lock.waitLock(10000)) return { ok: false, error: { message: '동시 팀 생성 요청 대기 초과' } };
+    try {
+      hasLock = lock.tryLock(15000);
+    } catch (e) {
+      hasLock = false;
+    }
     var auth = verifyToken(token);
-    if (!auth.valid || (auth.role !== 'leader' && auth.role !== 'admin')) return { ok: false, error: { message: '권한 없음' } };
+    if (!auth.valid) return { ok: false, error: { message: auth.message } };
+    if (auth.role !== 'leader' && auth.role !== 'admin') {
+      return { ok: false, error: { message: '팀 결성은 팀장만 가능합니다!' } };
+    }
     var config = getConfigMap();
     var minSize = parseInt(config.team_size_min || '2', 10);
     var maxSize = parseInt(config.team_size_max || '6', 10);
@@ -381,14 +390,16 @@ function createTeam(token, payload) {
     var emblem = payload.emblem || 'ball_normal';
     var selectedMemberIds = payload.memberIds || [];
     if (!teamName) return { ok: false, error: { message: '팀 이름 입력 필요' } };
-    if (selectedMemberIds.indexOf(auth.memberId) === -1) selectedMemberIds.push(auth.memberId);
+    if (selectedMemberIds.indexOf(auth.memberId) === -1 && auth.memberId !== 'ADMIN') {
+      selectedMemberIds.push(auth.memberId);
+    }
 
     var membersSheet = getSheet('Members');
     var members = getSheetObjects('Members');
     var teams = getSheetObjects('Teams');
 
     for (var i = 0; i < teams.length; i++) {
-      if (teams[i].team_name === teamName) return { ok: false, error: { message: '이미 존재' } };
+      if (teams[i].team_name === teamName) return { ok: false, error: { message: '이미 존재하는 팀 이름입니다.' } };
     }
     for (var j = 0; j < members.length; j++) {
       if (selectedMemberIds.indexOf(members[j].member_id) !== -1 && members[j].team_id) {
@@ -409,7 +420,11 @@ function createTeam(token, payload) {
     }
     return { ok: true, data: { teamId: newTeamId, teamName: teamName, emblem: emblem, message: '팀 [' + teamName + '] 결성 완료!' } };
   } catch (err) { return { ok: false, error: { message: err.toString() } }; }
-  finally { lock.releaseLock(); }
+  finally {
+    if (hasLock) {
+      try { lock.releaseLock(); } catch(e) {}
+    }
+  }
 }
 
 function getMissions(token) {
@@ -448,11 +463,21 @@ function getMissions(token) {
 
 function acquireMission(token, payload) {
   var lock = LockService.getScriptLock();
+  var hasLock = false;
   try {
-    if (!lock.waitLock(10000)) return { ok: false, error: { message: '요청 대기 초과' } };
+    try {
+      hasLock = lock.tryLock(15000);
+    } catch (e) {
+      hasLock = false;
+    }
     var auth = verifyToken(token);
-    if (!auth.valid || auth.role !== 'leader') return { ok: false, error: { message: '팀장만 가능' } };
-    if (!auth.teamId) return { ok: false, error: { message: '팀 결성 필요' } };
+    if (!auth.valid) return { ok: false, error: { message: auth.message } };
+    if (auth.role !== 'leader' && auth.role !== 'admin') {
+      return { ok: false, error: { message: '미션 포켓볼 획득은 팀장만 가능합니다!' } };
+    }
+    if (!auth.teamId && auth.role !== 'admin') {
+      return { ok: false, error: { message: '먼저 팀 결성을 완료해야 합니다!' } };
+    }
 
     var missionId = payload.missionId;
     var missions = getSheetObjects('Missions');
@@ -460,13 +485,13 @@ function acquireMission(token, payload) {
     for (var i = 0; i < missions.length; i++) {
       if (missions[i].mission_id === missionId) { targetMission = missions[i]; break; }
     }
-    if (!targetMission || targetMission.status !== 'open') return { ok: false, error: { message: '진행중 아님' } };
+    if (!targetMission || targetMission.status !== 'open') return { ok: false, error: { message: '진행 중인 미션이 아닙니다.' } };
 
     var logsSheet = getSheet('MissionLog');
     var logs = getSheetObjects('MissionLog');
     for (var j = 0; j < logs.length; j++) {
       if (logs[j].mission_id === missionId && logs[j].team_id === auth.teamId) {
-        return { ok: false, error: { message: '이미 획득함' } };
+        return { ok: false, error: { message: '우리 팀이 이미 획득한 미션입니다.' } };
       }
     }
 
@@ -480,17 +505,21 @@ function acquireMission(token, payload) {
     for (var s = 0; s < slots.length; s++) {
       if (usedIndices.indexOf(s) === -1) availableIndices.push(s);
     }
-    if (availableIndices.length === 0) return { ok: false, error: { message: '마감되었습니다.' } };
+    if (availableIndices.length === 0) return { ok: false, error: { message: '해당 미션의 모든 포켓볼 슬롯이 마감되었습니다.' } };
 
     var selectedIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
     var slotContent = slots[selectedIndex] || '특별 야생 미션';
     var logId = 'LOG_' + Utilities.getUuid().substring(0, 8);
     var nowIso = new Date().toISOString();
 
-    logsSheet.appendRow([logId, missionId, auth.teamId, selectedIndex, slotContent, nowIso, 'pending', '', '']);
+    logsSheet.appendRow([logId, missionId, auth.teamId || 'TEAM_ADMIN', selectedIndex, slotContent, nowIso, 'pending', '', '']);
     return { ok: true, data: { logId: logId, missionId: missionId, slotIndex: selectedIndex, slotContent: slotContent, ballType: targetMission.ball_type || 'normal', points: parseInt(targetMission.points || '0', 10), acquiredAt: nowIso } };
   } catch (err) { return { ok: false, error: { message: err.toString() } }; }
-  finally { lock.releaseLock(); }
+  finally {
+    if (hasLock) {
+      try { lock.releaseLock(); } catch(e) {}
+    }
+  }
 }
 
 function getMyBag(token) {
@@ -700,4 +729,88 @@ function adminUpdateConfig(token, payload) {
     }
     return { ok: true, data: { message: '설정 저장 완료' } };
   } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
+
+function adminUpsertMission(token, payload) {
+  try {
+    var auth = verifyToken(token);
+    if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한이 필요합니다.' } };
+
+    var missionsSheet = getSheet('Missions');
+    var missions = getSheetObjects('Missions');
+
+    var missionId = payload.mission_id || payload.missionId;
+    var title = (payload.title || '').trim();
+    var description = (payload.description || '').trim();
+    var points = parseInt(payload.points || '20', 10);
+    var slots = payload.slots || [];
+    if (typeof slots === 'string') {
+      try { slots = JSON.parse(slots); } catch (e) { slots = slots.split('\n').map(function(s){return s.trim();}).filter(Boolean); }
+    }
+    var slotCount = slots.length || parseInt(payload.slot_count || '4', 10);
+    var slotsJson = JSON.stringify(slots);
+    var acquireType = payload.acquire_type || 'gacha';
+    var ballType = payload.ball_type || 'normal';
+    var status = payload.status || 'open';
+
+    if (!title) return { ok: false, error: { message: '미션 제목을 입력하세요.' } };
+
+    var targetMission = null;
+    if (missionId) {
+      for (var i = 0; i < missions.length; i++) {
+        if (missions[i].mission_id === missionId) {
+          targetMission = missions[i];
+          break;
+        }
+      }
+    }
+
+    if (targetMission) {
+      var row = targetMission._rowIndex;
+      missionsSheet.getRange(row, 2).setValue(title);
+      missionsSheet.getRange(row, 3).setValue(description);
+      missionsSheet.getRange(row, 4).setValue(points);
+      missionsSheet.getRange(row, 5).setValue(slotCount);
+      missionsSheet.getRange(row, 6).setValue(slotsJson);
+      missionsSheet.getRange(row, 7).setValue(acquireType);
+      missionsSheet.getRange(row, 8).setValue(ballType);
+      missionsSheet.getRange(row, 11).setValue(status);
+      return { ok: true, data: { message: '미션 [' + title + '] 수정 완료!' } };
+    } else {
+      var newMissionId = 'Q' + ('00' + (missions.length + 1)).slice(-3);
+      missionsSheet.appendRow([
+        newMissionId, title, description, points, slotCount, slotsJson,
+        acquireType, ballType, '', '', status
+      ]);
+      return { ok: true, data: { message: '새 미션 [' + title + '] 등록 완료!' } };
+    }
+  } catch (err) {
+    return { ok: false, error: { message: err.toString() } };
+  }
+}
+
+function resetLeaderPassword(payload) {
+  try {
+    var config = getConfigMap();
+    if (payload.adminCode !== config.admin_code && payload.leaderCode !== config.leader_code) {
+      return { ok: false, error: { message: '관리자 코드 또는 팀장 코드가 일치하지 않습니다.' } };
+    }
+
+    var sheet = getSheet('Members');
+    var members = getSheetObjects('Members');
+    var target = null;
+    for (var i = 0; i < members.length; i++) {
+      if (members[i].member_id === payload.memberId || members[i].name === payload.memberName) {
+        target = members[i]; break;
+      }
+    }
+    if (!target) return { ok: false, error: { message: '명단에서 찾을 수 없는 사용자입니다.' } };
+
+    sheet.getRange(target._rowIndex, 6).setValue('');
+    sheet.getRange(target._rowIndex, 7).setValue(false);
+
+    return { ok: true, data: { message: target.name + ' 트레이너의 비밀번호가 초기화되었습니다! 로그인 화면에서 비밀번호를 다시 등록하세요.' } };
+  } catch (err) {
+    return { ok: false, error: { message: err.toString() } };
+  }
 }
