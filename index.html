@@ -1464,6 +1464,16 @@ function apiCall(funcName, ...args) {
 /* ===== SCREEN TRANSITION ROUTER ===== */
 const Router = {
   navigate(screenId, skipTransition = false) {
+    // ----------------------------------------------------
+    // [추가된 코드] 보호된 화면 접근 시 로그인(토큰) 여부 확인
+    const authRequired = ['s6', 's7', 's9', 's10', 's11'];
+    if (authRequired.includes(screenId) && !State.token) {
+      alert('⚠️ 로그인이 필요합니다!');
+      if (State.currentScreen !== 's1') this.navigate('s1', true);
+      return;
+    }
+    // ----------------------------------------------------
+
     // 팀원 권한으로 팀 결성 화면 s6 접근 제한
     if (screenId === 's6' && State.role === 'member') {
       alert('⚠️ 팀 결성은 팀장만 가능합니다! 팀원으로 접속하셨다면 팀장의 안내를 받으세요.');
