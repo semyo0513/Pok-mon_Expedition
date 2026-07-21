@@ -6,8 +6,100 @@
 
 var GITHUB_RAW_BASE = "https://raw.githubusercontent.com/semyo0513/Pok-mon_Expedition/main"; 
 
+// ==========================================
+// 시트 스키마 정의 (자동 생성용)
+// ==========================================
+var SHEET_SCHEMA = {
+  'Members':    ['member_id', 'name', 'class_info', 'role', 'team_id', 'pw_hash', 'pw_set', 'created_at'],
+  'Teams':      ['team_id', 'team_name', 'leader_id', 'emblem', 'total_points', 'created_at', 'status'],
+  'Missions':   ['mission_id', 'title', 'description', 'points', 'slot_count', 'slots_json', 'acquire_type', 'ball_type', 'open_at', 'close_at', 'status'],
+  'MissionLog': ['log_id', 'mission_id', 'team_id', 'slot_index', 'slot_content', 'acquired_at', 'result', 'judged_by', 'judged_at'],
+  'Points':     ['point_id', 'team_id', 'delta', 'reason', 'ref_log_id', 'created_by', 'created_at'],
+  'Sessions':   ['token', 'member_id', 'role', 'expires_at'],
+  'Config':     ['key', 'value', 'description']
+};
+
+/**
+ * 웹앱 최초 실행 시 필요한 모든 시트와 컬럼 헤더를 자동 생성합니다.
+ * 이미 존재하는 시트는 건너뛰고, Config 시트에 기본값이 없으면 초기 설정을 삽입합니다.
+ */
+function ensureDatabase() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var created = false;
+
+  // 각 시트 존재 여부 확인 후 없으면 생성
+  for (var sheetName in SHEET_SCHEMA) {
+    var sheet = ss.getSheetByName(sheetName);
+    if (!sheet) {
+      sheet = ss.insertSheet(sheetName);
+      created = true;
+    }
+    // 헤더가 비어있으면 헤더 삽입
+    if (sheet.getLastRow() === 0) {
+      var headers = SHEET_SCHEMA[sheetName];
+      sheet.appendRow(headers);
+      // 헤더 스타일링
+      var range = sheet.getRange(1, 1, 1, headers.length);
+      range.setBackground('#1F1F1F');
+      range.setFontColor('#F5F3DE');
+      range.setFontWeight('bold');
+      sheet.setFrozenRows(1);
+      created = true;
+    }
+  }
+
+  // Config 시트에 기본 설정값이 없으면 삽입
+  var configSheet = ss.getSheetByName('Config');
+  if (configSheet && configSheet.getLastRow() <= 1) {
+    configSheet.appendRow(['event_name', '2026 현장체험학습 포켓 탐험대', '행사명']);
+    configSheet.appendRow(['leader_code', 'GOLD-2026', '팀장 입장 코드']);
+    configSheet.appendRow(['member_code', 'SILVER-2026', '팀원 입장 코드']);
+    configSheet.appendRow(['admin_code', 'OAK-MASTER', '관리자(오박사) 코드']);
+    configSheet.appendRow(['team_size_min', '2', '팀 최소 인원']);
+    configSheet.appendRow(['team_size_max', '6', '팀 최대 인원']);
+    configSheet.appendRow(['ranking_visible', 'TRUE', '랭킹 공개 여부 (TRUE/FALSE)']);
+    configSheet.appendRow(['event_phase', 'building', '행사 단계 (building / mission / closed)']);
+  }
+
+  // Missions 시트에 샘플 미션이 없으면 삽입
+  var missionsSheet = ss.getSheetByName('Missions');
+  if (missionsSheet && missionsSheet.getLastRow() <= 1) {
+    missionsSheet.appendRow([
+      'Q001', '드레스코드 미션 (뽑기)', '포켓볼을 뽑아 나온 팀 미션을 수행하세요!',
+      20, 4,
+      JSON.stringify(['레트로 교복 룩 단체사진', '빨간색 포인트 단체 아이템 포즈', '포켓몬 트레이너 포즈 사진', '팀 엠블럼 바디 랭귀지 인증']),
+      'gacha', 'normal', '', '', 'open'
+    ]);
+    missionsSheet.appendRow([
+      'Q002', '야생의 룰렛 미션', '룰렛을 돌려 획득한 미션 장소로 이동하세요!',
+      30, 4,
+      JSON.stringify(['중앙 광장에서 단체 댄스 인증', '박물관 지정 유물 앞 단체 퀴즈', '공원 벤치에서 레트로 포즈', '연못 앞에서 팀원 모두 V자 포즈']),
+      'roulette', 'great', '', '', 'open'
+    ]);
+    missionsSheet.appendRow([
+      'Q003', '점심 보너스 스피드 미션 (선착순)', '가장 빠르게 터치하는 팀에 원하는 미션 선택권 부여!',
+      50, 3,
+      JSON.stringify(['오박사님과 단체 하트 셀카', '체험학습 장소 최고 인상깊은 장소 스케치', '팀 슬로건 3행시 창작']),
+      'first_come', 'master', '', '', 'open'
+    ]);
+  }
+
+  // 기본 시트(Sheet1) 정리 — 빈 기본시트가 남아있으면 삭제 시도
+  if (created) {
+    try {
+      var defaultSheet = ss.getSheetByName('Sheet1') || ss.getSheetByName('시트1');
+      if (defaultSheet && ss.getSheets().length > 1) {
+        ss.deleteSheet(defaultSheet);
+      }
+    } catch (e) { /* 무시 */ }
+  }
+}
+
 function doGet(e) {
   e = e || { parameter: {} };
+  
+  // 최초 실행 시 자동으로 DB 시트 생성
+  ensureDatabase();
   
   if (e.parameter && e.parameter.action) {
     var result = routeAction(e.parameter.action, e.parameter.token, e.parameter);
@@ -39,6 +131,9 @@ function doGet(e) {
 
 function doPost(e) {
   try {
+    // 최초 실행 시 자동으로 DB 시트 생성
+    ensureDatabase();
+
     var data = {};
     if (e && e.postData && e.postData.contents) {
       data = JSON.parse(e.postData.contents);
@@ -94,7 +189,19 @@ function getDb() { return SpreadsheetApp.getActiveSpreadsheet(); }
 function getSheet(sheetName) {
   var ss = getDb();
   var sheet = ss.getSheetByName(sheetName);
-  if (!sheet) throw new Error('시트를 찾을 수 없습니다: ' + sheetName);
+  if (!sheet) {
+    // 시트가 없으면 스키마에 따라 자동 생성
+    sheet = ss.insertSheet(sheetName);
+    var headers = SHEET_SCHEMA[sheetName];
+    if (headers) {
+      sheet.appendRow(headers);
+      var range = sheet.getRange(1, 1, 1, headers.length);
+      range.setBackground('#1F1F1F');
+      range.setFontColor('#F5F3DE');
+      range.setFontWeight('bold');
+      sheet.setFrozenRows(1);
+    }
+  }
   return sheet;
 }
 
