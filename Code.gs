@@ -720,14 +720,9 @@ function uploadMissionPhoto(token, payload) {
     var rawBytes = Utilities.base64Decode(splitData[1]);
     var blob = Utilities.newBlob(rawBytes, contentType, 'mission_' + logId + '.jpg');
     
-    var folderName = '포켓탐험대_미션인증';
-    var folders = DriveApp.getFoldersByName(folderName);
-    var folder;
-    if (folders.hasNext()) {
-      folder = folders.next();
-    } else {
-      folder = DriveApp.createFolder(folderName);
-    }
+    // 폴더 ID로 직접 접근 (권한 문제 방지)
+    var DRIVE_FOLDER_ID = '127SaNol6U8pSFpCIlbhA_nrC6CHDoBIp';
+    var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
     
     var file = folder.createFile(blob);
     file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
@@ -753,10 +748,13 @@ function uploadMissionPhoto(token, payload) {
 
 function adminJudge(token, payload) {
   var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
   try {
-    lock.waitLock(10000);
     var auth = verifyToken(token);
-    if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한 필요' } };
+    if (!auth.valid || auth.role !== 'admin') {
+      lock.releaseLock();
+      return { ok: false, error: { message: '관리자 권한 필요' } };
+    }
 
     var logId = payload.logId;
     var result = payload.result;
@@ -766,11 +764,14 @@ function adminJudge(token, payload) {
     for (var i = 0; i < logs.length; i++) {
       if (logs[i].log_id === logId) { targetLog = logs[i]; break; }
     }
-    if (!targetLog) return { ok: false, error: { message: '기록을 찾을 수 없음' } };
+    if (!targetLog) {
+      lock.releaseLock();
+      return { ok: false, error: { message: '기록을 찾을 수 없음' } };
+    }
 
     var nowIso = new Date().toISOString();
     logsSheet.getRange(targetLog._rowIndex, 7).setValue(result);
-    logsSheet.getRange(targetLog._rowIndex, 8).setValue(auth.memberId);
+    logsSheet.getRange(targetLog._rowIndex, 8).setValue(auth.memberId || auth.name || 'admin');
     logsSheet.getRange(targetLog._rowIndex, 9).setValue(nowIso);
 
     if (result === 'success') {
@@ -782,14 +783,17 @@ function adminJudge(token, payload) {
         }
       }
       var pointsSheet = getSheet('Points');
-      pointsSheet.appendRow(['P_' + Utilities.getUuid().substring(0, 8), targetLog.team_id, pointsToGive, '미션 성공: ' + targetLog.slot_content, logId, auth.memberId, nowIso]);
+      pointsSheet.appendRow(['P_' + Utilities.getUuid().substring(0, 8), targetLog.team_id, pointsToGive, '미션 성공: ' + targetLog.slot_content, logId, auth.memberId || auth.name || 'admin', nowIso]);
       recalculateTeamPoints(targetLog.team_id);
     }
 
     CacheService.getScriptCache().remove('RANKING_DATA');
-    return { ok: true, data: { message: '판정 저장 완료' } };
-  } catch (err) { return { ok: false, error: { message: err.toString() } }; }
-  finally { lock.releaseLock(); }
+    lock.releaseLock();
+    return { ok: true, data: { message: result === 'success' ? '✅ 판정 승인 완료!' : '❌ 판정 실패 처리 완료' } };
+  } catch (err) {
+    lock.releaseLock();
+    return { ok: false, error: { message: err.toString() } };
+  }
 }
 
 function recalculateTeamPoints(teamId) {
