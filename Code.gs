@@ -754,7 +754,7 @@ function uploadMissionPhoto(token, payload) {
 function adminJudge(token, payload) {
   var lock = LockService.getScriptLock();
   try {
-    if (!lock.waitLock(10000)) return { ok: false, error: { message: '잠시 후 다시 시도' } };
+    lock.waitLock(10000);
     var auth = verifyToken(token);
     if (!auth.valid || auth.role !== 'admin') return { ok: false, error: { message: '관리자 권한 필요' } };
 

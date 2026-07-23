@@ -459,9 +459,9 @@
 
   .menu-item {
     font-family: var(--font-game);
-    font-size: 15px;
+    font-size: 13px;
     color: var(--menu-text);
-    padding: 10px 10px 10px 28px;
+    padding: 10px 8px 10px 24px;
     border: 2px solid transparent;
     border-bottom: 2px solid #d8d8d8;
     cursor: pointer;
@@ -479,7 +479,7 @@
   .menu-item::before {
     content: '▶';
     position: absolute;
-    left: 8px;
+    left: 6px;
     font-size: 10px;
     color: var(--gbc-darkest);
     opacity: 0;
@@ -1017,7 +1017,7 @@
               </div>
               <div class="menu-item menu-item--red" onclick="AudioFX.playClick(); Router.navigate('s4')">
                 <span class="item-icon">🔬</span>
-                <span class="item-label">오박사 연구소 (관리자)</span>
+                <span class="item-label">오박사 연구소 [관리]</span>
               </div>
             </div>
           </div>
@@ -1042,7 +1042,7 @@
                 <div class="field-label">▶ 팀장 코드 입력</div>
                 <input type="text" id="s2-leader-code" class="gbc-input" placeholder="예: GOLD-2026">
 
-                <div id="s2-password-group" class="hidden">
+                <div id="s2-password-group">
                   <div class="field-label">▶ 비밀번호</div>
                   <input type="password" id="s2-password" class="gbc-input" placeholder="비밀번호">
                 </div>
@@ -1520,7 +1520,7 @@ const AudioFX = {
 };
 
 /* ===== GAS API CONFIG ===== */
-const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzm1jyRUMc9p4fDjdOrbC5bILUy_VRmw3mot1UYM8MIJzjaHkUpijiTdnE6HDXslTH2_A/exec";
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxJ755bYPUJo0RkLrhqPCcNcBhI9D7SNNRbbUHH9Ql32zyJ-VBxWl_54SDyZyf1l0w_1Q/exec";
 
 const State = {
   token: localStorage.getItem('POCKET_TOKEN') || '',
@@ -1767,12 +1767,26 @@ const App = {
     const memberId = document.getElementById('s2-member-select').value;
     const members = window._memberListData || [];
     const target = members.find(m => m.member_id === memberId);
-    const pwGroup = document.getElementById('s2-password-group');
-    if (target && target.pw_set) {
-      pwGroup.classList.remove('hidden');
+    
+    let pwTip = document.getElementById('s2-pw-tip');
+    if (!pwTip) {
+      pwTip = document.createElement('div');
+      pwTip.id = 's2-pw-tip';
+      pwTip.style.fontSize = '11px';
+      pwTip.style.color = '#346856';
+      pwTip.style.marginTop = '4px';
+      pwTip.style.fontWeight = 'bold';
+      document.getElementById('s2-password-group').appendChild(pwTip);
+    }
+    
+    if (target) {
+      if (target.pw_set) {
+        pwTip.textContent = '💡 이미 등록된 비밀번호를 입력해 접속하세요.';
+      } else {
+        pwTip.textContent = '💡 비밀번호가 미설정 상태입니다. 접속 버튼을 누르면 새로운 비밀번호를 설정할 수 있습니다.';
+      }
     } else {
-      pwGroup.classList.add('hidden');
-      document.getElementById('s2-password').value = '';
+      pwTip.textContent = '';
     }
   },
 
@@ -2351,6 +2365,7 @@ const App = {
   },
 
   openTeamDetailModal(teamId) {
+    window._currentActiveDetailTeamId = teamId;
     const teams = window._adminDashboardTeams || [];
     const logs = window._adminDashboardLogs || [];
     const members = window._adminDashboardMembers || [];
@@ -2384,12 +2399,20 @@ const App = {
           `;
         }
         
+        const actionBtnHtml = `
+          <div style="display:flex; gap:4px; margin-top:6px;">
+            <button class="admin-btn-sm admin-btn-sm--approve" style="font-size:10px; padding:3px 6px; width:auto; border-width:1px;" onclick="AudioFX.playClick(); App.handleAdminJudgeDetail('${l.log_id}', 'success')">⭕ 승인</button>
+            <button class="admin-btn-sm admin-btn-sm--reject" style="font-size:10px; padding:3px 6px; width:auto; border-width:1px;" onclick="AudioFX.playClick(); App.handleAdminJudgeDetail('${l.log_id}', 'fail')">❌ 실패</button>
+          </div>
+        `;
+
         missionList.innerHTML += `
           <div style="background:var(--gbc-lightest); border:1px solid var(--gbc-dark); padding:6px; border-radius:3px; font-size:11px; display:flex; justify-content:space-between; align-items:center;">
             <div>
               <div style="font-weight:bold; color:var(--gbc-darkest);">${l.mission_title}</div>
               <div style="color:var(--gbc-dark); margin-top:2px;">${l.slot_content}</div>
               ${imgHtml}
+              ${actionBtnHtml}
             </div>
             <div style="font-weight:bold; color:${color}; font-size:12px;">${statusText}</div>
           </div>
@@ -2397,6 +2420,25 @@ const App = {
       });
     }
     document.getElementById('modal-team-detail').classList.remove('hidden');
+  },
+
+  async handleAdminJudgeDetail(logId, result) {
+    try {
+      const res = await apiCall('adminJudge', State.token, { logId, result });
+      if (res.ok) {
+        AudioFX.playSuccess();
+        alert(res.data.message || '판정 완료!');
+        const activeTeamId = window._currentActiveDetailTeamId;
+        await App.loadAdminDashboard();
+        if (activeTeamId) {
+          App.openTeamDetailModal(activeTeamId);
+        }
+      } else {
+        alert(res.error ? res.error.message : '판정 실패');
+      }
+    } catch (e) {
+      alert('판정 연동 중 오류 발생: ' + e.toString());
+    }
   },
 
   async handleAdminJudge(logId, result) {
