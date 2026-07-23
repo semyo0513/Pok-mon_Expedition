@@ -721,20 +721,6 @@ function uploadMissionPhoto(token, payload) {
     var base64Data = payload.base64Data;
     if (!logId || !base64Data) return { ok: false, error: { message: '필수 파라미터가 누락되었습니다.' } };
 
-    var splitData = base64Data.split(',');
-    var contentType = splitData[0].match(/:(.*?);/)[1];
-    var rawBytes = Utilities.base64Decode(splitData[1]);
-    var blob = Utilities.newBlob(rawBytes, contentType, 'mission_' + logId + '.jpg');
-    
-    // 폴더 ID로 직접 접근 (권한 문제 방지)
-    var DRIVE_FOLDER_ID = '127SaNol6U8pSFpCIlbhA_nrC6CHDoBIp';
-    var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-    
-    var file = folder.createFile(blob);
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    
-    var downloadUrl = file.getWebViewLink();
-    
     var logsSheet = getSheet('MissionLog');
     var logs = getSheetObjects('MissionLog');
     var targetLog = null;
@@ -743,10 +729,11 @@ function uploadMissionPhoto(token, payload) {
     }
     if (!targetLog) return { ok: false, error: { message: '해당 미션 획득 기록을 찾을 수 없습니다.' } };
     
-    logsSheet.getRange(targetLog._rowIndex, 10).setValue(downloadUrl);
+    // DriveApp 권한 거부 문제를 100% 방지하기 위해 압축 이미지 Base64 데이터를 시트에 직접 저장
+    logsSheet.getRange(targetLog._rowIndex, 10).setValue(base64Data);
     logsSheet.getRange(targetLog._rowIndex, 7).setValue('pending');
     
-    return { ok: true, data: { imageUrl: downloadUrl, message: '사진 업로드 및 인증 요청 완료!' } };
+    return { ok: true, data: { imageUrl: base64Data, message: '사진 업로드 및 인증 요청 완료!' } };
   } catch (err) {
     return { ok: false, error: { message: err.toString() } };
   }

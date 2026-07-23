@@ -1522,7 +1522,7 @@ const AudioFX = {
 };
 
 /* ===== GAS API CONFIG ===== */
-const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxDFXe_rshJmNl-TdQdd48ePimMryLB0GaisAlgSNRFTZMVZJBXNw-dWwZzEt7pdSK50w/exec";
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwWDLmAWnLZ2Fw5To2JMJwkZPKDuQ2oc1g8Ps9e203osulKkem5pDBcn3x1QEFxfWThGQ/exec";
 
 const State = {
   token: localStorage.getItem('POCKET_TOKEN') || '',
@@ -2154,7 +2154,7 @@ const App = {
               </div>
               <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; border-top:1px dashed #d8d8d8; padding-top:6px;">
                 <div id="photo-status-${item.log_id}" style="font-size:11px; color:var(--gbc-dark);">
-                  ${item.image_url ? `<a href="${item.image_url}" target="_blank" style="color:var(--blue-water); font-weight:bold; display:flex; align-items:center; gap:4px;">🖼️ 등록된 사진 보기</a>` : '등록된 인증 사진 없음'}
+                  ${item.image_url ? `<a href="javascript:void(0)" onclick="App.viewFullImage('${item.image_url.replace(/'/g, "\\'")}')" style="color:var(--blue-water); font-weight:bold; display:flex; align-items:center; gap:4px;">🖼️ 등록된 사진 보기</a>` : '등록된 인증 사진 없음'}
                 </div>
                 ${photoBtnHtml}
               </div>
@@ -2163,6 +2163,18 @@ const App = {
         });
       }
     } catch (e) {}
+  },
+
+  viewFullImage(imgUrl) {
+    if (!imgUrl) return;
+    if (imgUrl.startsWith('data:')) {
+      const win = window.open('');
+      if (win) {
+        win.document.write(`<body style="margin:0; background:#081820; display:flex; justify-content:center; align-items:center; height:100vh;"><img src="${imgUrl}" style="max-width:100%; max-height:100vh; object-fit:contain; border:4px solid #f8d038; box-sizing:border-box;"/></body>`);
+      }
+    } else {
+      window.open(imgUrl, '_blank');
+    }
   },
 
   openUploadPhotoModal(logId, missionTitle) {
@@ -2307,7 +2319,7 @@ const App = {
             if (item.image_url) {
               imgHtml = `
                 <div style="margin: 6px 0; text-align: center;">
-                  <img src="${item.image_url}" style="max-width: 100%; max-height: 120px; border: 2px solid var(--gbc-darkest); border-radius: 4px; cursor: pointer; display: block; margin: 0 auto;" onclick="window.open('${item.image_url}')">
+                  <img src="${item.image_url}" style="max-width: 100%; max-height: 120px; border: 2px solid var(--gbc-darkest); border-radius: 4px; cursor: pointer; display: block; margin: 0 auto;" onclick="App.viewFullImage(this.src)">
                   <span style="font-size:10px; color:var(--gbc-dark);">(클릭 시 원본 보기)</span>
                 </div>
               `;
@@ -2396,7 +2408,7 @@ const App = {
         if (l.image_url) {
           imgHtml = `
             <div style="margin-top:4px;">
-              <img src="${l.image_url}" style="width:50px; height:50px; object-fit:cover; border:2px solid var(--gbc-darkest); border-radius:2px; cursor:pointer;" onclick="window.open('${l.image_url}')">
+              <img src="${l.image_url}" style="width:50px; height:50px; object-fit:cover; border:2px solid var(--gbc-darkest); border-radius:2px; cursor:pointer;" onclick="App.viewFullImage(this.src)">
             </div>
           `;
         }
