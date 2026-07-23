@@ -248,11 +248,24 @@ function getSheetObjects(sheetName) {
   var data = sheet.getDataRange().getValues();
   if (data.length <= 1) return [];
   var headers = data[0];
+  
+  if (sheetName === 'MissionLog') {
+    if (!headers[9] || headers[9] !== 'image_url') {
+      headers[9] = 'image_url';
+      try { sheet.getRange(1, 10).setValue('image_url'); } catch(e) {}
+    }
+  }
+
   var result = [];
   for (var i = 1; i < data.length; i++) {
     var row = data[i];
     var obj = {};
-    for (var j = 0; j < headers.length; j++) obj[headers[j]] = row[j];
+    for (var j = 0; j < headers.length; j++) {
+      if (headers[j]) obj[headers[j]] = row[j];
+    }
+    if (sheetName === 'MissionLog' && row.length >= 10 && row[9]) {
+      obj['image_url'] = row[9];
+    }
     obj._rowIndex = i + 1;
     result.push(obj);
   }
