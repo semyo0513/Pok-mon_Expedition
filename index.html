@@ -735,6 +735,63 @@
     100% { transform: scale(1.4) rotate(720deg); filter: brightness(1.5); }
   }
 
+  /* GACHA SHAKE ANIMATION */
+  .gacha-ball-draw {
+    position: relative;
+    width: 48px; height: 48px;
+    background: #fff;
+    border: 3px solid #181818;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto 10px auto;
+  }
+  .gacha-ball-draw::before {
+    content: ''; position: absolute; top:0; left:0; right:0; height:50%; background: var(--red-pokeball); border-bottom: 3px solid #181818;
+  }
+  .gacha-ball-draw::after {
+    content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: #fff; border: 3px solid #181818; border-radius: 50%; z-index: 10;
+  }
+  .gacha-ball-draw.shaking {
+    animation: gacha-shake 0.4s ease-in-out infinite;
+  }
+  .gacha-ball-draw.open {
+    animation: gacha-open-effect 0.5s ease-out forwards;
+  }
+  @keyframes gacha-shake {
+    0%, 100% { transform: rotate(0) translate(0, 0); }
+    25% { transform: rotate(-15deg) translate(-2px, 0); }
+    75% { transform: rotate(15deg) translate(2px, 0); }
+  }
+  @keyframes gacha-open-effect {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); filter: brightness(2) contrast(1.5); }
+    100% { transform: scale(0); opacity: 0; }
+  }
+
+  /* ROULETTE STRIP */
+  .roulette-container {
+    height: 40px; overflow: hidden; position: relative; width: 100%; border: 2px solid var(--gbc-light); border-radius: 3px; background: #102015;
+  }
+  .roulette-strip {
+    display: flex; flex-direction: column; transition: transform 0.1s ease-out; transform: translateY(0);
+  }
+  .roulette-slot {
+    height: 40px; line-height: 40px; text-align: center; color: var(--gbc-lightest); font-size: 13px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 8px;
+  }
+  .roulette-slot.active {
+    color: var(--gold-primary); background: rgba(248,208,48,0.2); text-shadow: 0 0 6px var(--gold-primary);
+  }
+
+  /* SPARK EFFECT FOR FIRST COME */
+  .spark-thunder {
+    font-size: 24px; font-weight: bold; color: var(--gold-primary);
+    animation: spark-flash 0.15s ease-in-out infinite alternate;
+  }
+  @keyframes spark-flash {
+    from { opacity: 0.3; transform: scale(0.8) rotate(-10deg); }
+    to { opacity: 1; transform: scale(1.2) rotate(10deg); }
+  }
+
   .tile-title { font-family: var(--font-game); font-size: 13px; font-weight: bold; color: var(--gbc-darkest); position: relative; z-index: 1; }
   .tile-exp { font-family: var(--font-game); font-size: 11px; color: var(--gbc-dark); font-weight: bold; position: relative; z-index: 1; }
   .tile-tag-get {
@@ -814,16 +871,59 @@
     z-index: 9999 !important;
     background: rgba(8, 24, 32, 0.9) !important;
   }
-  .loading-pokeball-spinner {
-    width: 60px; height: 60px;
+  .loading-pokeball {
+    position: relative;
+    width: 54px; height: 54px;
     margin: 0 auto 12px auto;
-    background: radial-gradient(circle at 50% 55%, #fff 6px, #181818 6px, #181818 8px, var(--red-pokeball) 8px, var(--red-pokeball) 50%, #181818 50%, #181818 53%, #f8f8f8 53%);
+    background: #fff;
+    border: 4px solid #181818;
     border-radius: 50%;
-    border: 3px solid #181818;
-    animation: big-ball-spin 1s linear infinite;
-    box-shadow: 0 0 20px var(--gold-primary);
+    overflow: hidden;
+    box-shadow: inset -4px -4px 0 rgba(0,0,0,0.15), 0 0 20px rgba(248, 208, 48, 0.4);
+    animation: loading-ball-shake 1.25s cubic-bezier(.36,.07,.19,.97) infinite;
   }
-  @keyframes big-ball-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .loading-pokeball::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: var(--red-pokeball);
+    border-bottom: 4px solid #181818;
+  }
+  .loading-pokeball::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 14px; height: 14px;
+    background: #fff;
+    border: 4px solid #181818;
+    border-radius: 50%;
+    z-index: 10;
+  }
+  .pokeball-inner-button {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px; height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    z-index: 20;
+    animation: loading-btn-blink 0.8s infinite;
+  }
+  @keyframes loading-ball-shake {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-3px, 0) rotate(-18deg); }
+    20% { transform: translate(3px, 0) rotate(18deg); }
+    30% { transform: translate(-3px, 0) rotate(-12deg); }
+    40% { transform: translate(3px, 0) rotate(12deg); }
+    50% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+  }
+  @keyframes loading-btn-blink {
+    0%, 100% { background: #fff; box-shadow: 0 0 0 0 rgba(248,80,48,0); }
+    50% { background: #ff3333; box-shadow: 0 0 4px 2px rgba(248,80,48,0.8); }
+  }
 
   /* ===== NAVIGATION ===== */
   .gbc-nav {
@@ -935,7 +1035,7 @@
               <div class="gbc-menu-title">🧢 트레이너 팀장 로그인</div>
               <div class="gbc-menu-body form-stack">
                 <div class="field-label">▶ 본인 이름 선택</div>
-                <select id="s2-member-select" class="gbc-select">
+                <select id="s2-member-select" class="gbc-select" onchange="App.handleLeaderSelectChange()">
                   <option value="">-- 명단 불러오는 중... --</option>
                 </select>
 
@@ -996,7 +1096,7 @@
                 <button class="gbc-btn gbc-btn--red" onclick="AudioFX.playClick(); App.handleResetPassword()">
                   ⚡ 비밀번호 초기화 진행
                 </button>
-                <button class="gbc-btn gbc-btn--white" onclick="AudioFX.playClick(); App.closeResetPasswordModal()">
+                <button class="gbc-btn gbc-btn--white" onclick="App.closeResetPasswordModal()">
                   취소
                 </button>
               </div>
@@ -1009,17 +1109,22 @@
           <div class="screen-bg-town" style="padding: 10px 0;">
             <div class="gbc-dialog">
               <div class="speaker">오박사</div>
-              파트너 트레이너! 팀장에게 전달받은 코드를 보여주게!
+              파트너 트레이너! 이름과 팀장에게 전달받은 코드를 보여주게!
             </div>
 
             <div class="gbc-menu">
               <div class="gbc-menu-title">🎒 팀원 파트너 입장</div>
               <div class="gbc-menu-body form-stack">
+                <div class="field-label">▶ 본인 이름 선택</div>
+                <select id="s3-member-select" class="gbc-select">
+                  <option value="">-- 명단 불러오는 중... --</option>
+                </select>
+
                 <div class="field-label">▶ 팀원 코드 입력</div>
                 <input type="text" id="s3-member-code" class="gbc-input" placeholder="예: SILVER-2026">
                 <div class="btn-stack">
                   <button class="gbc-btn gbc-btn--blue" onclick="AudioFX.playClick(); App.handleMemberLogin()">
-                    ▶ 게스트 세션 접속!
+                    ▶ 파트너 세션 접속!
                   </button>
                   <button class="gbc-btn gbc-btn--white" onclick="AudioFX.playClick(); Router.navigate('s1')">
                     ◀ 뒤로가기
@@ -1110,7 +1215,13 @@
               <div id="md-desc" style="font-family: var(--font-game); font-size: 13px; color: var(--gbc-darkest); background: var(--gbc-lightest); padding: 8px; border: 2px solid var(--gbc-dark); border-radius: 3px; margin-top: 8px; line-height: 1.5;">
                 미션 설명
               </div>
-              <div class="btn-stack">
+
+              <!-- 추첨 연출 애니메이션 영역 -->
+              <div id="draw-animation-container" class="hidden" style="margin-top: 10px; border: 3px solid var(--gbc-darkest); border-radius: 4px; background: var(--gbc-darkest); color: var(--gbc-lightest); padding: 12px; font-family: var(--font-game); text-align: center; position: relative; overflow: hidden; min-height: 120px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: inset 3px 3px 0 rgba(0,0,0,0.5);">
+                <!-- JS에서 동적으로 애니메이션을 주입함 -->
+              </div>
+
+              <div class="btn-stack" id="modal-action-buttons">
                 <button class="gbc-btn gbc-btn--red" id="btn-acquire-action" onclick="AudioFX.playClick(); App.executeAcquireMission()">
                   🔴 포켓볼 던지기 (획득)!
                 </button>
@@ -1137,6 +1248,52 @@
           </div>
         </section>
 
+        <!-- Photo Upload Modal -->
+        <div id="modal-upload-photo" class="modal-overlay hidden" style="z-index: 2000;">
+          <div class="modal-box" style="max-width: 320px;">
+            <div class="gbc-menu-title">📷 미션 사진 인증</div>
+            <div style="padding: 10px;" class="form-stack">
+              <div id="photo-upload-mission-title" style="font-family: var(--font-game); font-weight: bold; font-size: 13px; color: var(--gbc-darkest); margin-bottom: 6px;">미션명</div>
+              <div style="border: 3px dashed var(--gbc-dark); border-radius: 4px; padding: 16px; text-align: center; background: var(--gbc-lightest); cursor: pointer;" onclick="document.getElementById('photo-file-input').click()">
+                <span style="font-size: 28px;">📸</span>
+                <div style="font-family: var(--font-game); font-size: 12px; color: var(--gbc-dark); margin-top: 4px; font-weight: bold;">사진 촬영 / 이미지 선택</div>
+                <input type="file" id="photo-file-input" accept="image/*" style="display: none;" onchange="App.handlePhotoSelected(event)">
+              </div>
+              <div id="photo-preview-container" class="hidden" style="text-align: center; margin-top: 8px;">
+                <img id="photo-preview" style="max-width: 100%; max-height: 140px; border: 3px solid var(--gbc-darkest); border-radius: 4px;">
+                <div style="font-family: var(--font-game); font-size: 11px; color: var(--gbc-dark); margin-top: 2px;">(업로드 시 350px 해상도의 고화질 썸네일로 압축됩니다)</div>
+              </div>
+              <div class="btn-stack">
+                <button class="gbc-btn gbc-btn--gold" id="btn-upload-submit" onclick="AudioFX.playClick(); App.submitPhoto()" disabled>
+                  ⚡ 전송하기
+                </button>
+                <button class="gbc-btn gbc-btn--white" onclick="AudioFX.playClick(); document.getElementById('modal-upload-photo').classList.add('hidden')">
+                  취소
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Team Detail Modal -->
+        <div id="modal-team-detail" class="modal-overlay hidden" style="z-index: 2000;">
+          <div class="modal-box" style="max-width: 350px;">
+            <div class="gbc-menu-title" id="td-team-name">팀 상세 정보</div>
+            <div style="padding: 10px; font-family: var(--font-game);">
+              <div id="td-team-score" style="font-weight: bold; color: var(--gold-dark); margin-bottom: 6px; font-size: 13px;">점수: 0P</div>
+              <div id="td-team-members" style="color: var(--gbc-dark); font-size: 12px; margin-bottom: 10px;">멤버: </div>
+              <hr style="border: 1px dashed var(--gbc-dark); margin-bottom: 10px;">
+              <div style="font-weight: bold; margin-bottom: 6px; font-size: 12px; color: var(--gbc-darkest);">🎯 수행 미션 목록</div>
+              <div id="td-mission-list" style="max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                <!-- 미션 수행 기록 및 이미지 링크 -->
+              </div>
+              <div class="btn-stack" style="margin-top: 12px;">
+                <button class="gbc-btn gbc-btn--white" onclick="AudioFX.playClick(); document.getElementById('modal-team-detail').classList.add('hidden')">닫기</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- S10: LEADERBOARD -->
         <section id="screen-s10" class="view-screen">
           <div class="screen-bg-gym" style="padding: 10px 0; min-height: 100%;">
@@ -1160,14 +1317,24 @@
             </div>
 
             <div class="admin-tab-bar">
-              <button class="admin-tab-btn active" onclick="AudioFX.playClick(); App.showAdminTab('pending', this)">⚖판정</button>
+              <button class="admin-tab-btn active" onclick="AudioFX.playClick(); App.showAdminTab('dashboard', this)">📊현황</button>
+              <button class="admin-tab-btn" onclick="AudioFX.playClick(); App.showAdminTab('pending', this)">⚖판정</button>
               <button class="admin-tab-btn" onclick="AudioFX.playClick(); App.showAdminTab('missions', this)">🎯미션</button>
               <button class="admin-tab-btn" onclick="AudioFX.playClick(); App.showAdminTab('members', this)">👥명단</button>
               <button class="admin-tab-btn" onclick="AudioFX.playClick(); App.showAdminTab('config', this)">⚙설정</button>
             </div>
 
+            <!-- Tab: Dashboard -->
+            <div id="admin-tab-dashboard" class="admin-panel">
+              <div style="font-family: var(--font-game); font-size: 13px; font-weight: bold; color: var(--gbc-darkest); margin-bottom: 4px;">📊 팀별 현황 대시보드</div>
+              <div style="font-family: var(--font-game); font-size: 11px; color: var(--gbc-dark); margin-bottom: 8px;">(팀 이름을 클릭하면 미션 내용과 사진을 볼 수 있습니다)</div>
+              <div id="admin-dashboard-teams-list" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- JS loaded -->
+              </div>
+            </div>
+
             <!-- Tab: Pending -->
-            <div id="admin-tab-pending" class="admin-panel">
+            <div id="admin-tab-pending" class="admin-panel hidden">
               <div style="font-family: var(--font-game); font-size: 13px; font-weight: bold; color: var(--gbc-darkest); margin-bottom: 8px;">⚖ 성공/실패 판정 대기열</div>
               <div id="admin-pending-list"></div>
             </div>
@@ -1240,7 +1407,9 @@
       <!-- GLOBAL LOADING SPINNER MODAL -->
       <div id="global-loading-modal" class="modal-overlay hidden">
         <div class="modal-box text-center" style="max-width: 260px; padding: 20px 14px;">
-          <div class="loading-pokeball-spinner"></div>
+          <div class="loading-pokeball">
+            <div class="pokeball-inner-button"></div>
+          </div>
           <div style="font-family: var(--font-game); font-weight: bold; font-size: 14px; color: var(--gold-primary);">
             구글 시트 동기화 중...
           </div>
@@ -1501,7 +1670,7 @@ const Router = {
 
       State.currentScreen = screenId;
 
-      if (screenId === 's2') App.loadMemberList();
+      if (screenId === 's2' || screenId === 's3') App.loadMemberList();
       if (screenId === 's6') App.loadUnassignedMembers();
       if (screenId === 's7') App.loadMissions();
       if (screenId === 's9') App.loadMyBag();
@@ -1579,16 +1748,32 @@ const App = {
     try {
       const res = await apiCall('getMemberList', State.token);
       if (res.ok && res.data) {
+        window._memberListData = res.data.all || [];
         const select = document.getElementById('s2-member-select');
+        const selectS3 = document.getElementById('s3-member-select');
         const resetSelect = document.getElementById('modal-reset-member');
         let optionsHtml = '<option value="">-- 본인 이름을 선택하세요 --</option>';
-        (res.data.all || []).forEach(m => {
+        window._memberListData.forEach(m => {
           optionsHtml += `<option value="${m.member_id}">${m.name} (${m.class_info || '학생'})</option>`;
         });
         if (select) select.innerHTML = optionsHtml;
+        if (selectS3) selectS3.innerHTML = optionsHtml;
         if (resetSelect) resetSelect.innerHTML = optionsHtml;
       }
     } catch (e) {}
+  },
+
+  handleLeaderSelectChange() {
+    const memberId = document.getElementById('s2-member-select').value;
+    const members = window._memberListData || [];
+    const target = members.find(m => m.member_id === memberId);
+    const pwGroup = document.getElementById('s2-password-group');
+    if (target && target.pw_set) {
+      pwGroup.classList.remove('hidden');
+    } else {
+      pwGroup.classList.add('hidden');
+      document.getElementById('s2-password').value = '';
+    }
   },
 
   async handleLeaderLogin() {
@@ -1652,15 +1837,17 @@ const App = {
   },
 
   async handleMemberLogin() {
+    const memberId = document.getElementById('s3-member-select').value;
     const memberCode = document.getElementById('s3-member-code').value.trim();
-    if (!memberCode) return alert('팀원 코드를 입력하세요.');
+    if (!memberId || !memberCode) return alert('이름과 팀원 코드를 입력하세요.');
 
-    const res = await apiCall('login', { role: 'member', memberCode });
+    const res = await apiCall('login', { role: 'member', memberId, memberCode });
     if (res.ok) {
       this.saveSession(res.data);
       AudioFX.playSuccess();
+      alert(`반갑습니다, ${res.data.memberName || '팀원'} 파트너 트레이너님!`);
       Router.navigate('s7');
-    } else alert(res.error ? res.error.message : '팀원 코드 오류');
+    } else alert(res.error ? res.error.message : '팀원 로그인 실패');
   },
 
   async handleAdminLogin() {
@@ -1790,6 +1977,9 @@ const App = {
   closeMissionModal() {
     const ballIcon = document.getElementById('md-ball-icon');
     if (ballIcon) ballIcon.classList.remove('throwing');
+    document.getElementById('md-desc').classList.remove('hidden');
+    document.getElementById('draw-animation-container').classList.add('hidden');
+    document.getElementById('modal-action-buttons').classList.remove('hidden');
     document.getElementById('modal-mission-detail').classList.add('hidden');
   },
 
@@ -1799,27 +1989,114 @@ const App = {
       return alert('⚠️ 미션 포켓볼 던지기(획득)는 팀장만 가능합니다!');
     }
 
-    const ballIcon = document.getElementById('md-ball-icon');
-    const actionBtn = document.getElementById('btn-acquire-action');
-    if (ballIcon) ballIcon.classList.add('throwing');
-    if (actionBtn) actionBtn.disabled = true;
-
-    AudioFX.playTone(300, 'sine', 0.2, 0);
-    AudioFX.playTone(500, 'square', 0.2, 0.2);
-    AudioFX.playTone(800, 'square', 0.3, 0.5);
-
+    const m = State.currentMission;
+    const type = m.acquire_type || 'gacha';
+    
+    const descEl = document.getElementById('md-desc');
+    const animContainer = document.getElementById('draw-animation-container');
+    const actionButtons = document.getElementById('modal-action-buttons');
+    
+    descEl.classList.add('hidden');
+    animContainer.classList.remove('hidden');
+    actionButtons.classList.add('hidden');
+    
+    animContainer.innerHTML = '';
+    
+    let duration = 3000;
+    
+    if (type === 'gacha') {
+      animContainer.innerHTML = `
+        <div class="gacha-ball-draw shaking" id="gacha-ball"></div>
+        <div style="font-size:12px; margin-top:4px;" id="gacha-text">포켓볼이 흔들리는 중...</div>
+      `;
+      let t = 0;
+      const interval = setInterval(() => {
+        if (t >= 3) {
+          clearInterval(interval);
+          return;
+        }
+        AudioFX.playTone(180, 'sine', 0.15, 0);
+        t++;
+      }, 700);
+      
+      setTimeout(() => {
+        const ball = document.getElementById('gacha-ball');
+        const txt = document.getElementById('gacha-text');
+        if (ball) {
+          ball.classList.remove('shaking');
+          ball.classList.add('open');
+        }
+        if (txt) txt.textContent = '쨘! 포켓볼이 열렸다!';
+        AudioFX.playTone(600, 'square', 0.1, 0);
+        AudioFX.playTone(900, 'square', 0.25, 0.1);
+      }, 2300);
+      
+    } else if (type === 'roulette') {
+      const slots = m.slots || ['미션 1', '미션 2', '미션 3', '미션 4'];
+      let rouletteHtml = `
+        <div style="font-size:11px; margin-bottom:4px; color:var(--gbc-light);">🎯 룰렛 회전 중...</div>
+        <div class="roulette-container">
+          <div class="roulette-strip" id="roulette-strip">
+      `;
+      const totalSlots = [...slots, ...slots, ...slots, ...slots];
+      totalSlots.forEach(s => {
+        rouletteHtml += `<div class="roulette-slot">${s}</div>`;
+      });
+      rouletteHtml += `
+          </div>
+        </div>
+      `;
+      animContainer.innerHTML = rouletteHtml;
+      
+      const strip = document.getElementById('roulette-strip');
+      let offset = 0;
+      let speed = 25;
+      let counter = 0;
+      const maxCounter = 80;
+      
+      const spin = () => {
+        counter++;
+        offset += speed;
+        strip.style.transform = `translateY(-${offset % (slots.length * 40)}px)`;
+        
+        if (counter % 3 === 0) {
+          AudioFX.playTone(350, 'triangle', 0.04, 0);
+        }
+        
+        if (counter < maxCounter) {
+          if (counter > maxCounter * 0.6) speed = Math.max(2, speed - 1.5);
+          setTimeout(spin, 40 + (counter * 2.5));
+        }
+      };
+      spin();
+      
+    } else {
+      duration = 1200;
+      animContainer.innerHTML = `
+        <div class="spark-thunder">⚡ SPEED GET! ⚡</div>
+        <div style="font-size:12px; margin-top:8px; font-weight:bold;">몬스터볼 전격 포획 시도!</div>
+      `;
+      AudioFX.playTone(800, 'square', 0.15, 0);
+      AudioFX.playTone(1200, 'sine', 0.15, 0.1);
+      AudioFX.playTone(1600, 'square', 0.3, 0.2);
+    }
+    
     setTimeout(async () => {
-      const res = await apiCall('acquireMission', State.token, { missionId: State.currentMission.mission_id });
-      if (actionBtn) actionBtn.disabled = false;
-      if (ballIcon) ballIcon.classList.remove('throwing');
-      this.closeMissionModal();
+      const res = await apiCall('acquireMission', State.token, { missionId: m.mission_id });
+      
+      descEl.classList.remove('hidden');
+      animContainer.classList.add('hidden');
+      actionButtons.classList.remove('hidden');
+      App.closeMissionModal();
 
       if (res.ok) {
         AudioFX.playSuccess();
-        alert(`🎉 포켓볼 획득 성공!\n\n획득 미션: [${res.data.slotContent}]`);
+        alert(`🎉 미션 획득 성공!\n\n획득한 세부 미션은:\n[${res.data.slotContent}] 입니다!\n\n가방에서 사진 인증을 완료하세요!`);
         App.loadMissions();
-      } else alert(res.error ? res.error.message : '획득 실패');
-    }, 1200);
+      } else {
+        alert(res.error ? res.error.message : '획득 실패');
+      }
+    }, duration);
   },
 
   async loadMyBag() {
@@ -1838,19 +2115,127 @@ const App = {
         items.forEach(item => {
           const statusClass = item.result === 'success' ? 'status-clear' : (item.result === 'fail' ? 'status-fail' : 'status-pending');
           const statusText = item.result === 'success' ? 'CLEAR' : (item.result === 'fail' ? 'FAIL' : 'WAIT');
+          
+          let photoBtnHtml = '';
+          if (item.result !== 'success') {
+            photoBtnHtml = `
+              <button class="gbc-btn gbc-btn--gold" style="font-size:11px; padding:4px 8px; width:auto; margin-top:6px; box-shadow:1px 1px 0 rgba(0,0,0,0.3);" 
+                onclick="App.openUploadPhotoModal('${item.log_id}', '${item.title}')">
+                📸 사진인증
+              </button>
+            `;
+          }
+
           list.innerHTML += `
-            <div class="bag-item">
-              <div class="bag-item-ball"></div>
-              <div class="bag-item-info">
-                <div class="bag-item-title">${item.title}</div>
-                <div class="bag-item-detail">${item.slot_content} · +${item.points}EXP</div>
+            <div class="bag-item" style="flex-direction:column; align-items:stretch; gap:6px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div class="bag-item-ball"></div>
+                <div class="bag-item-info">
+                  <div class="bag-item-title">${item.title}</div>
+                  <div class="bag-item-detail">${item.slot_content} · +${item.points}EXP</div>
+                </div>
+                <div class="bag-item-status ${statusClass}">${statusText}</div>
               </div>
-              <div class="bag-item-status ${statusClass}">${statusText}</div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; border-top:1px dashed #d8d8d8; padding-top:6px;">
+                <div id="photo-status-${item.log_id}" style="font-size:11px; color:var(--gbc-dark);">
+                  ${item.image_url ? `<a href="${item.image_url}" target="_blank" style="color:var(--blue-water); font-weight:bold; display:flex; align-items:center; gap:4px;">🖼️ 등록된 사진 보기</a>` : '등록된 인증 사진 없음'}
+                </div>
+                ${photoBtnHtml}
+              </div>
             </div>
           `;
         });
       }
     } catch (e) {}
+  },
+
+  openUploadPhotoModal(logId, missionTitle) {
+    window._pendingUploadLogId = logId;
+    window._pendingBase64Data = null;
+    document.getElementById('photo-upload-mission-title').textContent = `미션: ${missionTitle}`;
+    document.getElementById('photo-preview-container').classList.add('hidden');
+    document.getElementById('photo-preview').src = '';
+    document.getElementById('btn-upload-submit').disabled = true;
+    document.getElementById('photo-file-input').value = '';
+    document.getElementById('modal-upload-photo').classList.remove('hidden');
+  },
+
+  handlePhotoSelected(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    showGlobalLoading();
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const max_size = 350;
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > max_size) {
+            height *= max_size / width;
+            width = max_size;
+          }
+        } else {
+          if (height > max_size) {
+            width *= max_size / height;
+            height = max_size;
+          }
+        }
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+        
+        const preview = document.getElementById('photo-preview');
+        preview.src = dataUrl;
+        document.getElementById('photo-preview-container').classList.remove('hidden');
+        document.getElementById('btn-upload-submit').disabled = false;
+        
+        window._pendingBase64Data = dataUrl;
+        hideGlobalLoading();
+      };
+      img.onerror = function() {
+        hideGlobalLoading();
+        alert('이미지 파일 로드에 실패했습니다.');
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  },
+
+  async submitPhoto() {
+    if (!window._pendingBase64Data || !window._pendingUploadLogId) return;
+    
+    const submitBtn = document.getElementById('btn-upload-submit');
+    submitBtn.disabled = true;
+    const oldText = submitBtn.textContent;
+    submitBtn.textContent = '전송 중...';
+    
+    try {
+      const res = await apiCall('uploadMissionPhoto', State.token, {
+        logId: window._pendingUploadLogId,
+        base64Data: window._pendingBase64Data
+      });
+      if (res.ok) {
+        AudioFX.playSuccess();
+        alert('📷 사진 인증 요청이 완료되었습니다!\n오박사(관리자)님이 즉시 확인하고 판정합니다.');
+        document.getElementById('modal-upload-photo').classList.add('hidden');
+        App.loadMyBag();
+      } else {
+        alert(res.error ? res.error.message : '사진 업로드 실패');
+      }
+    } catch (e) {
+      alert('오류 발생: ' + e.toString());
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = oldText;
+    }
   },
 
   async loadRanking() {
@@ -1899,31 +2284,133 @@ const App = {
         const list = document.getElementById('admin-pending-list');
         if (pending.length === 0) {
           list.innerHTML = '<div style="font-size:12px; color:var(--gbc-dark); font-family:var(--font-game); text-align:center; padding:10px;">대기 중인 판정이 없습니다.</div>';
-          return;
-        }
-        list.innerHTML = '';
-        pending.forEach(item => {
-          list.innerHTML += `
-            <div class="admin-pending-card">
-              <div class="admin-pending-title">${item.team_name} — ${item.mission_title}</div>
-              <div class="admin-pending-detail">내용: ${item.slot_content} (+${item.points}P)</div>
-              <div class="admin-btn-row">
-                <button class="admin-btn-sm admin-btn-sm--approve" onclick="AudioFX.playClick(); App.handleAdminJudge('${item.log_id}', 'success')">⭕ 승인</button>
-                <button class="admin-btn-sm admin-btn-sm--reject" onclick="AudioFX.playClick(); App.handleAdminJudge('${item.log_id}', 'fail')">❌ 실패</button>
+        } else {
+          list.innerHTML = '';
+          pending.forEach(item => {
+            let imgHtml = '';
+            if (item.image_url) {
+              imgHtml = `
+                <div style="margin: 6px 0; text-align: center;">
+                  <img src="${item.image_url}" style="max-width: 100%; max-height: 120px; border: 2px solid var(--gbc-darkest); border-radius: 4px; cursor: pointer; display: block; margin: 0 auto;" onclick="window.open('${item.image_url}')">
+                  <span style="font-size:10px; color:var(--gbc-dark);">(클릭 시 원본 보기)</span>
+                </div>
+              `;
+            } else {
+              imgHtml = `<div style="font-size:11px; color:#c04020; margin-top:4px; font-weight:bold;">⚠️ 업로드된 사진 없음</div>`;
+            }
+
+            list.innerHTML += `
+              <div class="admin-pending-card">
+                <div class="admin-pending-title">${item.team_name} — ${item.mission_title}</div>
+                <div class="admin-pending-detail">내용: ${item.slot_content} (+${item.points}P)</div>
+                ${imgHtml}
+                <div class="admin-btn-row">
+                  <button class="admin-btn-sm admin-btn-sm--approve" onclick="AudioFX.playClick(); App.handleAdminJudge('${item.log_id}', 'success')">⭕ 승인</button>
+                  <button class="admin-btn-sm admin-btn-sm--reject" onclick="AudioFX.playClick(); App.handleAdminJudge('${item.log_id}', 'fail')">❌ 실패</button>
+                </div>
               </div>
-            </div>
-          `;
-        });
+            `;
+          });
+        }
+
+        const teams = res.data.teams || [];
+        const allLogs = res.data.allLogs || [];
+        const members = res.data.members || [];
+        
+        window._adminDashboardTeams = teams;
+        window._adminDashboardLogs = allLogs;
+        window._adminDashboardMembers = members;
+        
+        const dashboardList = document.getElementById('admin-dashboard-teams-list');
+        if (dashboardList) {
+          if (teams.length === 0) {
+            dashboardList.innerHTML = '<div style="font-size:12px; color:var(--gbc-dark); font-family:var(--font-game); text-align:center; padding:10px;">등록된 팀이 없습니다.</div>';
+          } else {
+            dashboardList.innerHTML = '';
+            teams.forEach(t => {
+              const teamMembers = members.filter(m => m.team_id === t.team_id).map(m => m.name).join(', ') || '멤버 없음';
+              const successCount = allLogs.filter(l => l.team_id === t.team_id && l.result === 'success').length;
+              const pendingCount = allLogs.filter(l => l.team_id === t.team_id && l.result === 'pending').length;
+              
+              dashboardList.innerHTML += `
+                <div class="bag-item" style="cursor:pointer; padding:8px 10px;" onclick="AudioFX.playClick(); App.openTeamDetailModal('${t.team_id}')">
+                  <div class="rank-num" style="width:24px; height:24px; font-size:9px; border-color:var(--gbc-dark);">T</div>
+                  <div class="rank-info">
+                    <div class="rank-team-name" style="font-size:12px;">${t.team_name}</div>
+                    <div class="rank-members" style="font-size:10px;">${teamMembers}</div>
+                    <div style="font-size:10px; color:var(--gbc-dark); margin-top:2px;">성공: ${successCount} · 대기: ${pendingCount}</div>
+                  </div>
+                  <div class="rank-points" style="font-size:11px;">${t.total_points}P</div>
+                </div>
+              `;
+            });
+          }
+        }
       }
     } catch (e) {}
   },
 
+  openTeamDetailModal(teamId) {
+    const teams = window._adminDashboardTeams || [];
+    const logs = window._adminDashboardLogs || [];
+    const members = window._adminDashboardMembers || [];
+    
+    const team = teams.find(t => t.team_id === teamId);
+    if (!team) return;
+    
+    document.getElementById('td-team-name').textContent = `🚩 ${team.team_name} 상세`;
+    document.getElementById('td-team-score').textContent = `점수: ${team.total_points}P`;
+    
+    const teamMembers = members.filter(m => m.team_id === teamId).map(m => m.name).join(', ') || '멤버 없음';
+    document.getElementById('td-team-members').textContent = `멤버: ${teamMembers}`;
+    
+    const missionList = document.getElementById('td-mission-list');
+    missionList.innerHTML = '';
+    
+    const teamLogs = logs.filter(l => l.team_id === teamId);
+    if (teamLogs.length === 0) {
+      missionList.innerHTML = '<div style="font-size:11px; color:var(--gbc-dark); text-align:center; padding:8px;">획득한 미션이 없습니다.</div>';
+    } else {
+      teamLogs.forEach(l => {
+        const statusText = l.result === 'success' ? '성공' : (l.result === 'fail' ? '실패' : '대기');
+        const color = l.result === 'success' ? '#20a860' : (l.result === 'fail' ? '#d04040' : '#c8a008');
+        
+        let imgHtml = '';
+        if (l.image_url) {
+          imgHtml = `
+            <div style="margin-top:4px;">
+              <img src="${l.image_url}" style="width:50px; height:50px; object-fit:cover; border:2px solid var(--gbc-darkest); border-radius:2px; cursor:pointer;" onclick="window.open('${l.image_url}')">
+            </div>
+          `;
+        }
+        
+        missionList.innerHTML += `
+          <div style="background:var(--gbc-lightest); border:1px solid var(--gbc-dark); padding:6px; border-radius:3px; font-size:11px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:bold; color:var(--gbc-darkest);">${l.mission_title}</div>
+              <div style="color:var(--gbc-dark); margin-top:2px;">${l.slot_content}</div>
+              ${imgHtml}
+            </div>
+            <div style="font-weight:bold; color:${color}; font-size:12px;">${statusText}</div>
+          </div>
+        `;
+      });
+    }
+    document.getElementById('modal-team-detail').classList.remove('hidden');
+  },
+
   async handleAdminJudge(logId, result) {
-    const res = await apiCall('adminJudge', State.token, { logId, result });
-    if (res.ok) {
-      AudioFX.playSuccess();
-      alert(res.data.message);
-      this.loadAdminDashboard();
+    try {
+      const res = await apiCall('adminJudge', State.token, { logId, result });
+      if (res.ok) {
+        AudioFX.playSuccess();
+        alert(res.data.message || '판정 완료!');
+        this.loadAdminDashboard();
+      } else {
+        alert(res.error ? res.error.message : '판정 실패');
+      }
+    } catch (e) {
+      alert('판정 연동 중 오류 발생: ' + e.toString());
     }
   },
 

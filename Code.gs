@@ -13,7 +13,7 @@ var SHEET_SCHEMA = {
   'Members':    ['member_id', 'name', 'class_info', 'role', 'team_id', 'pw_hash', 'pw_set', 'created_at'],
   'Teams':      ['team_id', 'team_name', 'leader_id', 'emblem', 'total_points', 'created_at', 'status'],
   'Missions':   ['mission_id', 'title', 'description', 'points', 'slot_count', 'slots_json', 'acquire_type', 'ball_type', 'open_at', 'close_at', 'status'],
-  'MissionLog': ['log_id', 'mission_id', 'team_id', 'slot_index', 'slot_content', 'acquired_at', 'result', 'judged_by', 'judged_at'],
+  'MissionLog': ['log_id', 'mission_id', 'team_id', 'slot_index', 'slot_content', 'acquired_at', 'result', 'judged_by', 'judged_at', 'image_url'],
   'Points':     ['point_id', 'team_id', 'delta', 'reason', 'ref_log_id', 'created_by', 'created_at'],
   'Sessions':   ['token', 'member_id', 'role', 'expires_at'],
   'Config':     ['key', 'value', 'description']
@@ -109,11 +109,27 @@ function ensureDatabase() {
   }
 }
 
+
+// ==========================================
+// DB 초기화 최적화 (매번 실행 방지)
+// ==========================================
+function initDbIfNeeded() {
+  var props = PropertiesService.getScriptProperties();
+  // 이미 초기화가 완료되었다면 즉시 종료 (속도 대폭 향상)
+  if (props.getProperty('DB_INIT_DONE') === 'TRUE') {
+    return;
+  }
+  
+  ensureDatabase(); // 실제 시트 생성 로직 실행
+  props.setProperty('DB_INIT_DONE', 'TRUE'); // 초기화 완료 마킹
+}
+
+
 function doGet(e) {
   e = e || { parameter: {} };
   
-  // 최초 실행 시 자동으로 DB 시트 생성
-  ensureDatabase();
+  // 수정: 최초 실행 시에만 자동으로 DB 시트 생성 (최적화)
+  initDbIfNeeded(); 
   
   if (e.parameter && e.parameter.action) {
     var result = routeAction(e.parameter.action, e.parameter.token, e.parameter);
@@ -145,8 +161,8 @@ function doGet(e) {
 
 function doPost(e) {
   try {
-    // 최초 실행 시 자동으로 DB 시트 생성
-    ensureDatabase();
+    // 수정: 최초 실행 시에만 자동으로 DB 시트 생성 (최적화)
+    initDbIfNeeded(); 
 
     var data = {};
     if (e && e.postData && e.postData.contents) {
@@ -185,6 +201,7 @@ function routeAction(action, token, payload) {
     case 'getMissions': return getMissions(token);
     case 'acquireMission': return acquireMission(token, payload);
     case 'getMyBag': return getMyBag(token);
+    case 'uploadMissionPhoto': return uploadMissionPhoto(token, payload);
     case 'getRanking': return getRanking(token);
     case 'adminGetDashboard': return adminGetDashboard(token);
     case 'adminJudge': return adminJudge(token, payload);
@@ -314,8 +331,17 @@ function login(payload) {
 
     if (role === 'member') {
       if (payload.memberCode !== config.member_code) return { ok: false, error: { message: '팀원 입장 코드가 일치하지 않습니다.' } };
-      var guestToken = 'MEMBER_GUEST_' + Utilities.getUuid();
-      return { ok: true, data: { token: guestToken, role: 'member', memberName: '파트너 트레이너' } };
+      var members = getSheetObjects('Members');
+      var targetMember = null;
+      for (var i = 0; i < members.length; i++) {
+        if (members[i].member_id === payload.memberId || members[i].name === payload.memberName) {
+          targetMember = members[i]; break;
+        }
+      }
+      if (!targetMember) return { ok: false, error: { message: '명단에서 찾을 수 없는 사용자입니다.' } };
+
+      var memberToken = createSession(targetMember.member_id, 'member');
+      return { ok: true, data: { token: memberToken, role: 'member', memberId: targetMember.member_id, memberName: targetMember.name, teamId: targetMember.team_id || '' } };
     }
 
     if (role === 'leader') {
@@ -373,7 +399,8 @@ function getMemberList(token) {
     for (var i = 0; i < members.length; i++) {
       var m = members[i];
       if (m.role !== 'admin') {
-        var item = { member_id: m.member_id, name: m.name, class_info: m.class_info, team_id: m.team_id || '' };
+        var isPwSet = (m.pw_set === true || m.pw_set === 'TRUE' || m.pw_set === 'true');
+        var item = { member_id: m.member_id, name: m.name, class_info: m.class_info, team_id: m.team_id || '', pw_set: isPwSet };
         allMembers.push(item);
         if (!m.team_id) unassigned.push(item);
       }
@@ -634,6 +661,10 @@ function adminGetDashboard(token) {
     var logs = getSheetObjects('MissionLog');
     var config = getConfigMap();
 
+    var cleanMembers = members.map(function(m) {
+      return { member_id: m.member_id, name: m.name, class_info: m.class_info, role: m.role, team_id: m.team_id };
+    });
+
     var pendingLogs = [];
     var teamMap = {};
     for (var t = 0; t < teams.length; t++) teamMap[teams[t].team_id] = teams[t];
@@ -647,12 +678,77 @@ function adminGetDashboard(token) {
         pendingLogs.push({
           log_id: logs[l].log_id, team_id: logs[l].team_id, team_name: tm.team_name || logs[l].team_id,
           mission_title: ms.title || logs[l].mission_id, slot_content: logs[l].slot_content,
-          points: parseInt(ms.points || '0', 10), acquired_at: logs[l].acquired_at
+          points: parseInt(ms.points || '0', 10), acquired_at: logs[l].acquired_at,
+          image_url: logs[l].image_url || ''
         });
       }
     }
-    return { ok: true, data: { members: members, teams: teams, missions: missions, pendingLogs: pendingLogs, config: config } };
+
+    var allLogs = logs.map(function(l) {
+      var ms = misMap[l.mission_id] || {};
+      return {
+        log_id: l.log_id,
+        mission_id: l.mission_id,
+        team_id: l.team_id,
+        slot_index: l.slot_index,
+        slot_content: l.slot_content,
+        acquired_at: l.acquired_at,
+        result: l.result,
+        judged_by: l.judged_by,
+        judged_at: l.judged_at,
+        image_url: l.image_url || '',
+        points: parseInt(ms.points || '0', 10),
+        mission_title: ms.title || l.mission_id
+      };
+    });
+
+    return { ok: true, data: { members: cleanMembers, teams: teams, missions: missions, pendingLogs: pendingLogs, allLogs: allLogs, config: config } };
   } catch (err) { return { ok: false, error: { message: err.toString() } }; }
+}
+
+function uploadMissionPhoto(token, payload) {
+  try {
+    var auth = verifyToken(token);
+    if (!auth.valid) return { ok: false, error: { message: auth.message } };
+    
+    var logId = payload.logId;
+    var base64Data = payload.base64Data;
+    if (!logId || !base64Data) return { ok: false, error: { message: '필수 파라미터가 누락되었습니다.' } };
+
+    var splitData = base64Data.split(',');
+    var contentType = splitData[0].match(/:(.*?);/)[1];
+    var rawBytes = Utilities.base64Decode(splitData[1]);
+    var blob = Utilities.newBlob(rawBytes, contentType, 'mission_' + logId + '.jpg');
+    
+    var folderName = '포켓탐험대_미션인증';
+    var folders = DriveApp.getFoldersByName(folderName);
+    var folder;
+    if (folders.hasNext()) {
+      folder = folders.next();
+    } else {
+      folder = DriveApp.createFolder(folderName);
+    }
+    
+    var file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    
+    var downloadUrl = file.getWebViewLink();
+    
+    var logsSheet = getSheet('MissionLog');
+    var logs = getSheetObjects('MissionLog');
+    var targetLog = null;
+    for (var i = 0; i < logs.length; i++) {
+      if (logs[i].log_id === logId) { targetLog = logs[i]; break; }
+    }
+    if (!targetLog) return { ok: false, error: { message: '해당 미션 획득 기록을 찾을 수 없습니다.' } };
+    
+    logsSheet.getRange(targetLog._rowIndex, 10).setValue(downloadUrl);
+    logsSheet.getRange(targetLog._rowIndex, 7).setValue('pending');
+    
+    return { ok: true, data: { imageUrl: downloadUrl, message: '사진 업로드 및 인증 요청 완료!' } };
+  } catch (err) {
+    return { ok: false, error: { message: err.toString() } };
+  }
 }
 
 function adminJudge(token, payload) {
