@@ -6,6 +6,12 @@
 
 var GITHUB_RAW_BASE = "https://raw.githubusercontent.com/semyo0513/Pok-mon_Expedition/main"; 
 
+// Google Drive 쓰기/생성 권한(https://www.googleapis.com/auth/drive) 스코프 강제 감지용 힌트
+function _forceDriveScopeHint() {
+  DriveApp.getRootFolder();
+  DriveApp.createFile('permission_hint.txt', 'hint');
+}
+
 // ==========================================
 // 시트 스키마 정의 (자동 생성용)
 // ==========================================

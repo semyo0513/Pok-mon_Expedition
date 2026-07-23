@@ -304,14 +304,15 @@
   /* ===== S1: TITLE SCREEN ===== */
   .title-screen {
     background: linear-gradient(180deg, #88c070 0%, #58a050 40%, #306830 100%);
-    padding: 16px;
+    padding: 10px 12px 52px 12px;
     text-align: center;
     min-height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 8px;
+    gap: 4px;
     position: relative;
+    box-sizing: border-box;
   }
 
   .title-screen::after {
@@ -319,7 +320,7 @@
     position: absolute;
     bottom: 0;
     left: 0; right: 0;
-    height: 48px;
+    height: 40px;
     background: 
       repeating-linear-gradient(90deg, 
         var(--gbc-dark) 0px, var(--gbc-dark) 12px, 
@@ -327,6 +328,7 @@
         var(--gbc-dark) 14px, var(--gbc-dark) 26px,
         var(--gbc-darkest) 26px, var(--gbc-darkest) 28px);
     animation: grass-scroll 2s linear infinite;
+    pointer-events: none;
   }
 
   @keyframes grass-scroll {
@@ -335,8 +337,8 @@
   }
 
   .title-pokeball {
-    width: 80px; height: 80px;
-    margin: 0 auto 12px auto;
+    width: 56px; height: 56px;
+    margin: 0 auto 4px auto;
     position: relative;
     animation: title-ball-bounce 1.5s ease-in-out infinite;
   }
@@ -344,16 +346,16 @@
   .title-pokeball .ball-top {
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 38px;
+    height: 26px;
     background: var(--red-pokeball);
-    border: 4px solid var(--gbc-darkest);
-    border-radius: 40px 40px 0 0;
+    border: 3px solid var(--gbc-darkest);
+    border-radius: 30px 30px 0 0;
     border-bottom: none;
   }
   .title-pokeball .ball-mid {
     position: absolute;
-    top: 36px; left: 0; right: 0;
-    height: 8px;
+    top: 25px; left: 0; right: 0;
+    height: 6px;
     background: var(--gbc-darkest);
   }
   .title-pokeball .ball-mid::after {
@@ -361,47 +363,47 @@
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 20px; height: 20px;
+    width: 14px; height: 14px;
     background: var(--white-clean);
-    border: 4px solid var(--gbc-darkest);
+    border: 3px solid var(--gbc-darkest);
     border-radius: 50%;
-    box-shadow: 0 0 0 3px var(--white-clean);
+    box-shadow: 0 0 0 2px var(--white-clean);
   }
   .title-pokeball .ball-bottom {
     position: absolute;
     bottom: 0; left: 0; right: 0;
-    height: 38px;
+    height: 26px;
     background: var(--white-clean);
-    border: 4px solid var(--gbc-darkest);
-    border-radius: 0 0 40px 40px;
+    border: 3px solid var(--gbc-darkest);
+    border-radius: 0 0 30px 30px;
     border-top: none;
   }
 
   @keyframes title-ball-bounce {
     0%, 100% { transform: translateY(0) rotate(0deg); }
-    30% { transform: translateY(-20px) rotate(-8deg); }
+    30% { transform: translateY(-12px) rotate(-8deg); }
     50% { transform: translateY(0) rotate(0deg); }
-    60% { transform: translateY(-8px) rotate(4deg); }
+    60% { transform: translateY(-4px) rotate(4deg); }
     75% { transform: translateY(0) rotate(0deg); }
   }
 
   .title-text {
     font-family: var(--font-pixel);
-    font-size: 16px;
+    font-size: 14px;
     color: var(--gold-primary);
     text-shadow: 
       2px 2px 0 var(--gbc-darkest),
       -1px -1px 0 var(--gbc-darkest),
       1px -1px 0 var(--gbc-darkest),
       -1px 1px 0 var(--gbc-darkest),
-      0 3px 0 var(--gold-dark);
-    letter-spacing: 1px;
-    line-height: 1.4;
+      0 2px 0 var(--gold-dark);
+    letter-spacing: 0.5px;
+    line-height: 1.2;
   }
 
   .title-sub {
     font-family: var(--font-game);
-    font-size: 14px;
+    font-size: 12px;
     color: var(--gbc-lightest);
     text-shadow: 1px 1px 0 var(--gbc-darkest);
   }
@@ -411,14 +413,14 @@
     font-size: 8px;
     color: var(--gbc-lightest);
     opacity: 0.7;
-    margin-top: 4px;
+    margin-top: 2px;
   }
 
   .press-start {
     font-family: var(--font-pixel);
     font-size: 9px;
     color: var(--gbc-darkest);
-    margin-top: 12px;
+    margin-top: 6px;
     animation: blink-text 1.2s steps(2) infinite;
   }
 
@@ -1411,7 +1413,7 @@
             <div class="pokeball-inner-button"></div>
           </div>
           <div style="font-family: var(--font-game); font-weight: bold; font-size: 14px; color: var(--gold-primary);">
-            구글 시트 동기화 중...
+            오박사 연구소 데이터 통신 중...
           </div>
           <div style="font-family: var(--font-game); font-size: 12px; color: var(--gbc-lightest); margin-top: 6px;">
             잠시만 기다려 주세요! ⚡
@@ -1520,7 +1522,7 @@ const AudioFX = {
 };
 
 /* ===== GAS API CONFIG ===== */
-const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxb4cSAUIqsJ0ii-QPQ4JXA6xUOQuWm4mKgF8DF7p4FBw7iqfbXvobe-ntfF38OKYs4og/exec";
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwWDLmAWnLZ2Fw5To2JMJwkZPKDuQ2oc1g8Ps9e203osulKkem5pDBcn3x1QEFxfWThGQ/exec";
 
 const State = {
   token: localStorage.getItem('POCKET_TOKEN') || '',
